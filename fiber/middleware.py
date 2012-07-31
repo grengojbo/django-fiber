@@ -79,7 +79,7 @@ class AdminPageMiddleware(object):
                 # Add fiber-data attribute to body tag.
                 #import ipdb; ipdb.set_trace()
                 response.content = self.body_re.sub(
-                    r"<head>\g<IN_HEAD></head>\g<AFTER_HEAD><body data-fiber-data='%(fiber_data)s'\g<IN_BODY_TAG>>\g<BODY_CONTENTS>%(javascript)s</body>" % {
+                    r"<head>\g<IN_HEAD>%(javascript)s</head>\g<AFTER_HEAD><body data-fiber-data='%(fiber_data)s'\g<IN_BODY_TAG>>\g<BODY_CONTENTS></body>" % {
                         'javascript': self.get_header_html(request),
                         'fiber_data': simplejson.dumps(fiber_data),
                     },
