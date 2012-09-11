@@ -2,7 +2,7 @@ import re
 import random
 
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponseNotFound
 from django.template import loader, RequestContext
 from django.utils.encoding import smart_unicode
 from django.utils import simplejson
@@ -25,9 +25,16 @@ class AdminPageMiddleware(object):
         self.editor_settings = self.get_editor_settings()
 
     def process_response(self, request, response):
+
+        # if the response is None (this happens when DEBUG = False and a non existing url is called)
+        # then just return a not found. (anton@ignaz.at)
+        if not response:
+            return HttpResponseNotFound()
+
         # only process html and xhtml responses
         if response['Content-Type'].split(';')[0] not in ('text/html', 'application/xhtml+xml'):
             return response
+
         if self.set_login_session(request, response):
             request.session['show_fiber_admin'] = True
             url_without_fiber = request.path_info.replace(LOGIN_STRING, '')
@@ -40,6 +47,7 @@ class AdminPageMiddleware(object):
                 querystring = ''
 
             return HttpResponseRedirect('%s%s' % (url_without_fiber, querystring))
+
         else:
             fiber_data = {}
 
