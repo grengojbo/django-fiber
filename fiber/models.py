@@ -12,11 +12,12 @@ from django.utils.translation import ugettext_lazy as _
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
 
-from app_settings import IMAGES_DIR, FILES_DIR, METADATA_PAGE_SCHEMA, METADATA_CONTENT_SCHEMA
-import managers
-from utils.fields import FiberURLField, FiberMarkupField, FiberHTMLField
-from utils.json import JSONField
-from utils.urls import get_named_url_from_quoted_url, is_quoted_url
+from .app_settings import IMAGES_DIR, FILES_DIR, METADATA_PAGE_SCHEMA, METADATA_CONTENT_SCHEMA, \
+    PAGE_MANAGER, CONTENT_ITEM_MANAGER
+from .utils.class_loader import load_class
+from .utils.fields import FiberURLField, FiberMarkupField, FiberHTMLField
+from .utils.json import JSONField
+from .utils.urls import get_named_url_from_quoted_url, is_quoted_url
 
 
 class ContentItem(models.Model):
@@ -30,7 +31,7 @@ class ContentItem(models.Model):
     template_name = models.CharField(_('template name'), blank=True, max_length=70)
     used_on_pages_data = JSONField(_('used on pages'), blank=True, null=True)
 
-    objects = managers.ContentItemManager()
+    objects = load_class(CONTENT_ITEM_MANAGER)
 
     class Meta:
         verbose_name = _('content item')
@@ -89,7 +90,7 @@ class Page(MPTTModel):
     metadata = JSONField(blank=True, null=True, schema=METADATA_PAGE_SCHEMA, prefill_from='fiber.models.Page')
 
     tree = TreeManager()
-    objects = managers.PageManager()
+    objects = load_class(PAGE_MANAGER)
 
     class Meta:
         verbose_name = _('page')
@@ -201,7 +202,6 @@ class Page(MPTTModel):
     def move_page(self, target_id, position):
         """
         Moves the node. Parameters:
-        - page_id: the page to move
         - target_id: target page
         - position:
             - before: move the page before the target page
@@ -294,6 +294,11 @@ class Image(models.Model):
         return self.image.name
 
     def save(self, *args, **kwargs):
+        # delete existing Image(s) with the same image.name - TODO: warn about this?
+        existing_images = Image.objects.filter(image=os.path.join(IMAGES_DIR, self.image.name))
+        for existing_image in existing_images:
+            existing_image.delete()
+
         self.get_image_information()
         super(Image, self).save(*args, **kwargs)
 
@@ -318,6 +323,14 @@ class File(models.Model):
 
     def __unicode__(self):
         return self.file.name
+
+    def save(self, *args, **kwargs):
+        # delete existing File(s) with the same file.name - TODO: warn about this?
+        existing_files = File.objects.filter(file=os.path.join(FILES_DIR, self.file.name))
+        for existing_file in existing_files:
+            existing_file.delete()
+
+        super(File, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         os.remove(os.path.join(settings.MEDIA_ROOT, str(self.file)))

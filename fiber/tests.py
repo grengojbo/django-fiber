@@ -1,9 +1,15 @@
+import re
+
+from django.conf.urls import patterns, url
+from django.views.generic import View
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.template import Template, Context
 from django.test import TestCase
+from django.core.exceptions import ValidationError
 
-from models import ContentItem, Page, PageContentItem
+from .models import ContentItem, Page, PageContentItem
+from .utils.validators import FiberURLValidator
 
 
 def format_list(l, must_sort=True, separator=' '):
@@ -20,12 +26,12 @@ def format_list(l, must_sort=True, separator=' '):
     return separator.join(titles)
 
 
-def strip_whitespace(text):
-    return text.replace(
-        '\n', ''
-    ).replace(
-        '\t', ''
-    ).strip()
+def condense_html_whitespace(s):
+    s = re.sub("\s\s*", " ", s)
+    s = re.sub(">\s*<", "><", s)
+    s = re.sub(" class=\"\s?(.*?)\s?\"", " class=\"\\1\"", s)
+    s = s.strip()
+    return s
 
 
 class ContentItemTest(TestCase):
@@ -80,7 +86,7 @@ class ContentItemTest(TestCase):
 
         def check_content(name, html):
             self.assertEquals(
-                strip_whitespace(
+                condense_html_whitespace(
                     ContentItem.objects.get(name=name).content_html
                 ),
                 html
@@ -163,13 +169,13 @@ class PageTest(TestCase):
 
         # references in content items are changed
         self.assertEquals(
-            strip_whitespace(
+            condense_html_whitespace(
                 ContentItem.objects.get(name='a').content_html
             ),
             '<p><a href="/section2/abc/">abc</a></p>'
         )
         self.assertEquals(
-            strip_whitespace(
+            condense_html_whitespace(
                 ContentItem.objects.get(name='b').content_html
             ),
             '<p><a href="/section2/abc/xyz/">xyz</a></p>'
@@ -226,13 +232,13 @@ class PageTest(TestCase):
 
         # references in content items are changed
         self.assertEquals(
-            strip_whitespace(
+            condense_html_whitespace(
                 ContentItem.objects.get(name='a').content_html
             ),
             '<p><a href="/section1/a_b_c/">abc</a></p>'
         )
         self.assertEquals(
-            strip_whitespace(
+            condense_html_whitespace(
                 ContentItem.objects.get(name='b').content_html
             ),
             '<p><a href="/section1/a_b_c/xyz/">xyz</a></p>'
@@ -329,7 +335,7 @@ class TestTemplateTags(TestCase):
         })
         with self.assertNumQueries(2):
             self.assertEquals(
-                strip_whitespace(t.render(c)),
+                condense_html_whitespace(t.render(c)),
                 ('<ul>'
                    '<li class="home first last">'
                      '<a href="/">home</a>'
@@ -372,7 +378,7 @@ class TestTemplateTags(TestCase):
 
         with self.assertNumQueries(2):
             self.assertEquals(
-                strip_whitespace(t.render(c)),
+                condense_html_whitespace(t.render(c)),
                 ('<ul>'
                    '<li class="section1 first">'
                      '<a href="/section1/">section1</a>'
@@ -397,7 +403,7 @@ class TestTemplateTags(TestCase):
 
         with self.assertNumQueries(2):
             self.assertEquals(
-                strip_whitespace(t.render(c)),
+                condense_html_whitespace(t.render(c)),
                 ('<ul>'
                    '<li class="section1 first">'
                      '<a href="/section1/">section1</a>'
@@ -424,7 +430,7 @@ class TestTemplateTags(TestCase):
         })
         with self.assertNumQueries(2):
             self.assertEquals(
-                strip_whitespace(t.render(c)),
+                condense_html_whitespace(t.render(c)),
                 ('<ul>'
                    '<li class="section1 first">'
                      '<a href="/section1/">section1</a>'
@@ -442,7 +448,7 @@ class TestTemplateTags(TestCase):
 
         with self.assertNumQueries(2):
             self.assertEquals(
-                strip_whitespace(t.render(c)),
+                condense_html_whitespace(t.render(c)),
                 ('<ul>'
                    '<li class="sub1 first">'
                      '<a href="/section1/sub1/">sub1</a>'
@@ -471,13 +477,12 @@ class TestTemplateTags(TestCase):
         })
         with self.assertNumQueries(2):
             self.assertEquals(
-                strip_whitespace(t.render(c)),
+                condense_html_whitespace(t.render(c)),
                 ('<ul>'
                  '<li class="home first last">'
                  '<a href="/">home</a>'
                  '</li>'
                  '</ul>'))
-
 
     def test_show_admin_menu_all(self):
         self.generate_data()
@@ -495,24 +500,24 @@ class TestTemplateTags(TestCase):
 
         with self.assertNumQueries(2):
             self.assertEquals(
-                strip_whitespace(t.render(c)),
-                ('<ul data-fiber-data=\'{"type": "page", "add_url": "%(fiber_admin_page_add_url)s", "parent_id": 1}\'>'
+                condense_html_whitespace(t.render(c)),
+                ('<ul data-fiber-data=\'{ "type": "page", "add_url": "%(fiber_admin_page_add_url)s", "parent_id": 1 }\'>'
                    '<li class="home first last">'
-                     '<a href="/" data-fiber-data=\'{"type": "page", "id": 2, "parent_id": 1, "url": "%(fiber_admin_page_edit_url_home)s", "add_url": "%(fiber_admin_page_add_url)s"}\'>home</a>'
-                     '<ul data-fiber-data=\'{"type": "page", "add_url": "%(fiber_admin_page_add_url)s", "parent_id": 2}\'>'
+                     '<a href="/" data-fiber-data=\'{ "can_edit": true, "type": "page", "id": 2, "parent_id": 1, "url": "%(fiber_admin_page_edit_url_home)s", "add_url": "%(fiber_admin_page_add_url)s" }\'>home</a>'
+                     '<ul data-fiber-data=\'{ "type": "page", "add_url": "%(fiber_admin_page_add_url)s", "parent_id": 2 }\'>'
                        '<li class="section1 first">'
-                         '<a href="/section1/" data-fiber-data=\'{"type": "page", "id": 3, "parent_id": 2, "url": "%(fiber_admin_page_edit_url_section1)s", "add_url": "%(fiber_admin_page_add_url)s"}\'>section1</a>'
-                         '<ul data-fiber-data=\'{"type": "page", "add_url": "%(fiber_admin_page_add_url)s", "parent_id": 3}\'>'
+                         '<a href="/section1/" data-fiber-data=\'{ "can_edit": true, "type": "page", "id": 3, "parent_id": 2, "url": "%(fiber_admin_page_edit_url_section1)s", "add_url": "%(fiber_admin_page_add_url)s" }\'>section1</a>'
+                         '<ul data-fiber-data=\'{ "type": "page", "add_url": "%(fiber_admin_page_add_url)s", "parent_id": 3 }\'>'
                            '<li class="sub1 first">'
-                             '<a href="/section1/sub1/" data-fiber-data=\'{"type": "page", "id": 5, "parent_id": 3, "url": "%(fiber_admin_page_edit_url_sub1)s", "add_url": "%(fiber_admin_page_add_url)s"}\'>sub1</a>'
+                             '<a href="/section1/sub1/" data-fiber-data=\'{ "can_edit": true, "type": "page", "id": 5, "parent_id": 3, "url": "%(fiber_admin_page_edit_url_sub1)s", "add_url": "%(fiber_admin_page_add_url)s" }\'>sub1</a>'
                            '</li>'
                            '<li class="sub2 last">'
-                             '<a href="/section1/sub2/" data-fiber-data=\'{"type": "page", "id": 6, "parent_id": 3, "url": "%(fiber_admin_page_edit_url_sub2)s", "add_url": "%(fiber_admin_page_add_url)s"}\'>sub2</a>'
+                             '<a href="/section1/sub2/" data-fiber-data=\'{ "can_edit": true, "type": "page", "id": 6, "parent_id": 3, "url": "%(fiber_admin_page_edit_url_sub2)s", "add_url": "%(fiber_admin_page_add_url)s" }\'>sub2</a>'
                            '</li>'
                          '</ul>'
                        '</li>'
                        '<li class="section2 last">'
-                         '<a href="/section2/" data-fiber-data=\'{"type": "page", "id": 4, "parent_id": 2, "url": "%(fiber_admin_page_edit_url_section2)s", "add_url": "%(fiber_admin_page_add_url)s"}\'>section2</a>'
+                         '<a href="/section2/" data-fiber-data=\'{ "can_edit": true, "type": "page", "id": 4, "parent_id": 2, "url": "%(fiber_admin_page_edit_url_section2)s", "add_url": "%(fiber_admin_page_add_url)s" }\'>section2</a>'
                        '</li>'
                      '</ul>'
                    '</li>'
@@ -525,3 +530,64 @@ class TestTemplateTags(TestCase):
                         'fiber_admin_page_edit_url_sub2': reverse('fiber_admin:fiber_page_change', args=(6, )),
                         }
                  ))
+
+    def test_show_page_content(self):
+        # The show_page_content templatetag should support rendering content from multiple pages in one view.
+
+        p1 = Page.objects.create(title='p1')
+        c1 = ContentItem.objects.create(content_html='<p>c1</p>')
+        PageContentItem.objects.create(content_item=c1, page=p1, block_name='test_block')
+        p2 = Page.objects.create(title='p2')
+        c2 = ContentItem.objects.create(content_html='<p>c2</p>')
+        PageContentItem.objects.create(content_item=c2, page=p2, block_name='test_block')
+
+        t = Template("""
+            {% load fiber_tags %}
+            {% show_page_content second_page 'test_block' %}
+            {% show_page_content 'test_block' %}
+            """
+            )
+
+        c = Context({
+            'fiber_page': p1,
+            'second_page': p2
+        })
+
+        self.assertEquals(
+            condense_html_whitespace(t.render(c)),
+            ('<div><div class="content"><p>c2</p></div></div><div><div class="content"><p>c1</p></div></div>'))
+
+
+class TestView(View):
+    pass
+
+
+urlpatterns = patterns('',
+    url(r'^test_url/$', TestView.as_view(), name='another_named_url'),
+)
+
+
+class TestUtilsURLValidator(TestCase):
+    urls = 'fiber.tests'  # use this url conf for our tests
+    validator = FiberURLValidator()
+
+    def test_passes_normal(self):
+        self.assertEqual(self.validator('http://www.google.com/'), None)
+
+    def test_passes_url_contains_anchor(self):
+        self.assertEqual(self.validator('/some/page/#SomeAnchor'), None)
+
+    def test_passes_url_contains_querystring_and_anchor(self):
+        self.assertEqual(self.validator('/some/page/?id=12&user_id=1#SomeAnchor'), None)
+
+    def test_named_url(self):
+        # Must raise if named url does not exist
+        with self.assertRaises(ValidationError):
+            self.validator('"some_named_url"')
+
+        # Named url does exist
+        self.assertEquals(self.validator('"another_named_url"'), None)
+
+        # A fiber page also uses that named_url
+        Page.objects.create(title='some_page', url='"another_named_url"').save()
+        self.assertEquals(self.validator('"another_named_url"'), None)
