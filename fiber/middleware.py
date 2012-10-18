@@ -7,7 +7,7 @@ from django.template import loader, RequestContext
 from django.utils.encoding import smart_unicode
 from django.utils import simplejson
 
-from .app_settings import LOGIN_STRING, EXCLUDE_URLS, EDITOR
+from .app_settings import LOGIN_STRING, EXCLUDE_URLS, EDITOR, FIBER_PERMISSION_GROUP
 from .models import ContentItem, Page
 from .utils.import_util import import_element
 
@@ -134,8 +134,7 @@ class AdminPageMiddleware(object):
         """
         Only show the Fiber admin interface when the request
         - has a response status code of 200
-        #- is performed by an admin user (removed by anton@ignaz.at)
-        - is performed by an user in the 'Content Manager' group (added by anton@ignaz.at)
+        - is performed by an user in the groups specified in FIBER_PERMISSION_GROUP default 'Content Manager' group
         - has a response which is either 'text/html' or 'application/xhtml+xml'
         - is not an AJAX request
         - does not match EXCLUDE_URLS (empty by default)
@@ -144,10 +143,16 @@ class AdminPageMiddleware(object):
             return False
         if not hasattr(request, 'user'):
             return False
+
+        # (removed by anton@ignaz.at)
         #if not request.user.is_staff:
         #    return False
-        if request.user.groups and request.user.groups.filter(name='Content Manager').count() == 0: # added by anton@ignaz.at
+
+        # added by anton@ignaz.at
+        #import ipdb; ipdb.set_trace()
+        if request.user.groups and request.user.groups.filter(name=FIBER_PERMISSION_GROUP).count() == 0:
             return False
+
         if response['Content-Type'].split(';')[0] not in ('text/html', 'application/xhtml+xml'):
             return False
         if request.is_ajax():
