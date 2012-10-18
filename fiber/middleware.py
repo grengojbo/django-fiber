@@ -82,11 +82,10 @@ class AdminPageMiddleware(object):
                         except AttributeError:
                             pass
 
-                # Inject header html in head.
+                # Inject Javascript. (anton@ignaz.at)
                 # Add fiber-data attribute to body tag.
-                #import ipdb; ipdb.set_trace()
                 response.content = self.body_re.sub(
-                    r"<head>\g<IN_HEAD>%(javascript)s</head>\g<AFTER_HEAD><body data-fiber-data='%(fiber_data)s'\g<IN_BODY_TAG>>\g<BODY_CONTENTS></body>" % {
+                    r"<head>\g<IN_HEAD></head>\g<AFTER_HEAD><body data-fiber-data='%(fiber_data)s'\g<IN_BODY_TAG>>\g<BODY_CONTENTS>%(javascript)s</body>" % {
                         'javascript': self.get_header_html(request),
                         'fiber_data': simplejson.dumps(fiber_data),
                     },
@@ -135,7 +134,8 @@ class AdminPageMiddleware(object):
         """
         Only show the Fiber admin interface when the request
         - has a response status code of 200
-        - is performed by an admin user
+        #- is performed by an admin user (removed by anton@ignaz.at)
+        - is performed by an user in the 'Content Manager' group (added by anton@ignaz.at)
         - has a response which is either 'text/html' or 'application/xhtml+xml'
         - is not an AJAX request
         - does not match EXCLUDE_URLS (empty by default)
@@ -144,7 +144,9 @@ class AdminPageMiddleware(object):
             return False
         if not hasattr(request, 'user'):
             return False
-        if not request.user.is_staff:
+        #if not request.user.is_staff:
+        #    return False
+        if request.user.groups and request.user.groups.filter(name='Content Manager').count() == 0: # added by anton@ignaz.at
             return False
         if response['Content-Type'].split(';')[0] not in ('text/html', 'application/xhtml+xml'):
             return False
