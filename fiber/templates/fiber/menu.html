@@ -1,23 +1,18 @@
 {% load mptt_tags fiber_tags %}
 {% if user.is_staff %}
     {% if fiber_menu_parent_page %}
-
-<ul data-fiber-data='{
+<ul class='nav' data-fiber-data='{
     "type": "page",
     "add_url": "{{ Page.get_add_url }}",
     "parent_id": {{ fiber_menu_parent_page.id }}
 }'>
-
     {% else %}
-
-<ul>
-
+<ul class='nav'>
     {% endif %}
     {% recursetree fiber_menu_pages %}
-
         <li class="
             {{ node.title|slugify }}
-            {% if node in fiber_current_pages %}current{% endif %}
+            {% if node in fiber_current_pages %}current active{% endif %}
             {% if node.is_first_child %}first{% endif %}
             {% if node.is_last_child %}last{% endif %}
             {% if not node.show_in_menu %}hidden-in-menu{% endif %}
@@ -53,35 +48,23 @@
     {% endrecursetree %}
 
 </ul>
-
 {% else %}
-
-<ul>
-
+<ul class='nav'>
     {% recursetree fiber_menu_pages %}
-
-        <li class="
-            {{ node.title|slugify }}
-            {% if node in fiber_current_pages %}current{% endif %}
-            {% if node.is_first_child %}first{% endif %}
-            {% if node.is_last_child %}last{% endif %}
-        ">
+        {% if children %}
+        <li class="dropdown {{ node.title|slugify }}{% if node in fiber_current_pages %} current active{% endif %}
+            {% if node.is_first_child %} first{% endif %}{% if node.is_last_child %} last{% endif %}">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ node.title }}</a>
+            <ul class="dropdown-menu">
+            {{ children }}
+            </ul>
+        {% else %}
+            <li class="{{ node.title|slugify }}{% if node in fiber_current_pages %} current active{% endif %}
+            {% if node.is_first_child %} first{% endif %}{% if node.is_last_child %} last{% endif %}">
             <a href="{{ node.get_absolute_url }}">{{ node.title }}</a>
-
-            {% if children %}
-
-                <ul>
-
-                    {{ children }}
-
-                </ul>
-
-            {% endif %}
-
+        {% endif %}
         </li>
-
     {% endrecursetree %}
 
 </ul>
-
 {% endif %}
