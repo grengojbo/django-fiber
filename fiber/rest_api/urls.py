@@ -14,7 +14,9 @@ from fiber.models import Page, PageContentItem, ContentItem, Image, File
 from fiber.utils.date import friendly_datetime
 from fiber.app_settings import PERMISSION_CLASS
 from fiber.utils import class_loader
-
+import logging
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 from .views import ApiRoot, MovePageView, MovePageContentItemView, ListView, TreeListView, FileListView, ImageListView, InstanceView
 
@@ -96,8 +98,8 @@ class ImageResource(FileResource):
 
 
 urlpatterns = patterns('',
-    #(r'^$', ApiRoot.as_view()),
-    url(r'^$', ApiRoot.as_view(), name='fiber-api-root'),
+    (r'^$', ApiRoot.as_view()),
+    #url(r'^$', ApiRoot.as_view(), name='fiber-api-root'),
     url(r'^pages/$', ListView.as_view(resource=PageResource), name='page-resource-root'),
     url(r'^pages/(?P<pk>[^/]+)/$', InstanceView.as_view(resource=PageResource), name='page-resource-instance'),
     url(r'^pages/(?P<pk>[^/]+)/move_page/$', MovePageView.as_view(), name='page-resource-instance-move'),
