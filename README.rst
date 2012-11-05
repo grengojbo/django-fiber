@@ -1,3 +1,6 @@
+.. image:: https://secure.travis-ci.org/ridethepony/django-fiber.png
+  :target: http://travis-ci.org/#!/ridethepony/django-fiber
+
 ============
 Django Fiber
 ============

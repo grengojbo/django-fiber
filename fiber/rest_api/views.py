@@ -63,6 +63,8 @@ class ListView(ListOrCreateModelView):
 
 class TreeListView(View):
     logger.debug("TreeListView")
+    renderers = API_RENDERERS
+    
     def get(self, request):
         """
         Provide jqTree data for the PageSelect dialog.
@@ -71,7 +73,7 @@ class TreeListView(View):
 
 
 class PaginatedListView(PaginatorMixin, ListView):
-    logger.debug("PaginatedListView")
+
     limit = 5
 
     def check_fields(self, order_by):
@@ -98,7 +100,7 @@ class PaginatedListView(PaginatorMixin, ListView):
 
 
 class FileListView(PaginatedListView):
-    logger.debug("FileListView")
+
     orderable_fields = ('filename', 'updated')
 
     def get_queryset(self, *args, **kwargs):
@@ -122,7 +124,7 @@ class FileListView(PaginatedListView):
 
 
 class ImageListView(PaginatedListView):
-    logger.debug("ImageListView")
+
     orderable_fields = ('filename', 'size', 'updated')
 
     def get_queryset(self, *args, **kwargs):
@@ -149,7 +151,7 @@ class ImageListView(PaginatedListView):
 
 
 class InstanceView(InstanceModelView):
-    logger.debug("InstanceView")
+
     permissions = (IsAuthenticated, )
     renderers = API_RENDERERS
 
@@ -160,7 +162,7 @@ class InstanceView(InstanceModelView):
 
 
 class MovePageView(View):
-    logger.debug("MovePageView")
+
     permissions = (IsAuthenticated, )
     renderers = API_RENDERERS
 
@@ -181,7 +183,7 @@ class MovePageView(View):
 
 
 class MovePageContentItemView(View):
-    logger.debug("MovePageContentItemView")
+
     permissions = (IsAuthenticated, )
     renderers = API_RENDERERS
 
