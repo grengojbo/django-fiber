@@ -62,6 +62,8 @@ class ListView(ListOrCreateModelView):
 
 
 class TreeListView(View):
+    renderers = API_RENDERERS
+    
     logger.debug("TreeListView")
     def get(self, request):
         """

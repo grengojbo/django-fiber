@@ -669,9 +669,9 @@ var BaseFileSelectDialog = AdminRESTDialog.extend({
 			element: upload_button_pane[0],
 			button: upload_button_pane[0], // connecting directly to the jQUery UI upload_button doesn't work
 			action: this.get_upload_path(),
-			params: {
-				title: 'uploaded'
-			},
+			onSubmit: $.proxy(function(id, fileName) {
+				uploader._options.params.title = fileName;
+			}, this),
 			onComplete: $.proxy(function(id, fileName, responseJSON) {
 				this.refresh_grid();
 			}, this),
@@ -804,7 +804,8 @@ Fiber.ImageSelectDialog = BaseFileSelectDialog.extend({
 				{title: gettext('Updated'), key: 'updated'}
 			],
 			url: this.options.url,
-			order_by: 'filename'
+			order_by: 'updated',
+			sortorder: 'desc'
 		});
 
 		this.select_grid.bind('datagrid.select', function() {
@@ -884,7 +885,8 @@ Fiber.FileSelectDialog = BaseFileSelectDialog.extend({
 				{title: gettext('Updated'), key: 'updated'}
 			],
 			url: this.options.url,
-			order_by: 'filename'
+			order_by: 'updated',
+			sortorder: 'desc'
 		});
 		this.select_grid.bind('datagrid.select', function() {
 			action_button.attr('disabled', '');
@@ -925,7 +927,7 @@ Fiber.PageSelectDialog = AdminRESTDialog.extend({
 	defaults: {
 		url: '/api/v2/pages/',
 		width: 480,
-		height: 320,
+		height: 520,
 		start_width: 480,
 		start_height: 320
 	},
