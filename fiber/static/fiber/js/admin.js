@@ -1789,10 +1789,15 @@ var adminPage = {
 		enhance_jsontextareas($(document.body));
 
 		var backend_toolbar = $('<div id="fiber-backend-toolbar"></div>');
+		//var g_backend_toolbar = $('<li class="grp-user-options-container grp-collapse grp-closed"></li>');
+		var g_backend_toolbar = $('<li></li>');
 		var frontend_button = $('<p class="frontend"></p>').appendTo(backend_toolbar);
 		var link = $(document.createElement('a')).text(gettext('Frontend')).attr('href', '/').attr('title', gettext('Frontend')).appendTo(frontend_button);
+		var g_link = $(document.createElement('a')).text(gettext('Frontend')).attr('href', '/').attr('title', gettext('Frontend')).appendTo(g_backend_toolbar);
 		$('<span class="icon"></span>').prependTo(link);
-		backend_toolbar.prependTo($('body'));
+		$('<span class="icon"></span>').prependTo(g_link);
+		//backend_toolbar.prependTo($('body'));
+		g_backend_toolbar.prependTo($('#grp-user-tools'));
 	},
 
 	init: function(body_fiber_data) {
