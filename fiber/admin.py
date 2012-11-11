@@ -12,6 +12,9 @@ from .app_settings import TEMPLATE_CHOICES, CONTENT_TEMPLATE_CHOICES, PERMISSION
 from .editor import get_editor_field_name
 from .models import Page, ContentItem, PageContentItem, Image, File
 from .utils.class_loader import load_class
+import logging
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 perms = load_class(PERMISSION_CLASS)
 
@@ -49,6 +52,7 @@ class UserPermissionMixin(object):
 
 
 class FileAdmin(UserPermissionMixin, admin.ModelAdmin):
+    logger.debug('FileAdmin')
     list_display = ('__unicode__', 'title', )
     date_hierarchy = 'updated'
     search_fields = ('title', )
@@ -80,6 +84,7 @@ class ImageAdmin(FileAdmin):
 
 
 class ContentItemAdmin(UserPermissionMixin, admin.ModelAdmin):
+    logger.debug('ContentItemAdmin')
     list_display = ('__unicode__',)
     form = forms.ContentItemAdminForm
     fieldsets = (
@@ -92,11 +97,13 @@ class ContentItemAdmin(UserPermissionMixin, admin.ModelAdmin):
 
 
 class PageContentItemInline(UserPermissionMixin, admin.TabularInline):
+    logger.debug('PageContentItem')
     model = PageContentItem
     extra = 1
 
 
 class PageAdmin(UserPermissionMixin, MPTTModelAdmin):
+    logger.debug('PageAdmin')
 
     form = forms.PageForm
     fieldsets = (
@@ -148,6 +155,7 @@ class PageAdmin(UserPermissionMixin, MPTTModelAdmin):
 
 
 class FiberAdminContentItemAdmin(UserPermissionMixin, fiber_admin.ModelAdmin):
+    change_form_template = 'fiber/admin/change_form.html'
     list_display = ('__unicode__',)
     form = forms.ContentItemAdminForm
 
@@ -156,16 +164,19 @@ class FiberAdminContentItemAdmin(UserPermissionMixin, fiber_admin.ModelAdmin):
 
         # remove content template choices if there are no choices
         if len(CONTENT_TEMPLATE_CHOICES) == 0:
+            logger.debug('FiberAdminContentItemAdmin: CONTENT_TEMPLATE_CHOICES = 0')
             self.fieldsets = (
                 (None, {'classes': ('hide-label',), 'fields': (get_editor_field_name('content_html'), )}),
             )
         else:
+            logger.debug('FiberAdminContentItemAdmin: CONTENT_TEMPLATE_CHOICES')
             self.fieldsets = (
                 (None, {'classes': ('hide-label',), 'fields': (get_editor_field_name('content_html'), 'template_name', )}),
             )
 
 
 class FiberAdminPageAdmin(UserPermissionMixin, fiber_admin.MPTTModelAdmin):
+    logger.debug('FiberAdminPageAdmin')
 
     form = forms.PageForm
 
