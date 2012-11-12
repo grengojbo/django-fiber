@@ -1,3 +1,4 @@
+# -*- mode: python; coding: utf-8; -*-
 import operator
 
 from django import template
@@ -118,7 +119,7 @@ def show_menu(context, menu_name, min_level, max_level, expand=None):
 register.inclusion_tag('fiber/menu.html', takes_context=True)(show_menu)
 
 
-def show_content(context, content_item_name):
+def show_content(context, content_item_name, item_class="content"):
     content_item = None
     try:
         content_item = ContentItem.objects.get(name__exact=content_item_name)
@@ -126,6 +127,7 @@ def show_content(context, content_item_name):
         pass
 
     context['content_item'] = content_item
+    context['item_class'] = item_class
 
     return context
 
