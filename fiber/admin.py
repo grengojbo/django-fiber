@@ -155,7 +155,7 @@ class PageAdmin(UserPermissionMixin, MPTTModelAdmin):
 
 
 class FiberAdminContentItemAdmin(UserPermissionMixin, fiber_admin.ModelAdmin):
-    change_form_template = 'fiber/admin/change_form.html'
+    #change_form_template = 'fiber/admin/change_form.html'
     list_display = ('__unicode__',)
     form = forms.ContentItemAdminForm
 
