@@ -1,3 +1,4 @@
+# -*- mode: python; coding: utf-8; -*-
 import os
 
 from django.conf import settings
@@ -77,15 +78,15 @@ class Page(MPTTModel):
     updated = models.DateTimeField(_('updated'), auto_now=True)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='subpages', verbose_name=_('parent'))
     # TODO: add keywords, description (as meta?)
-    title = models.CharField(_('title'), blank=True, max_length=255)
+    title = models.CharField(_('title'), blank=True, max_length=255, help_text=_('The title  of the page is used in the HTML title of the page.'))
     url = FiberURLField(blank=True)
     redirect_page = models.ForeignKey('self', null=True, blank=True, related_name='redirected_pages', verbose_name=_('redirect page'), on_delete=models.SET_NULL)
     mark_current_regexes = models.TextField(_('mark current regexes'), blank=True)
     # TODO: add `alias_page` field
-    template_name = models.CharField(_('template name'), blank=True, max_length=70)
+    template_name = models.CharField(_('template name'), blank=True, max_length=70, help_text=_("Example: 'flatpages_plus/contact_page.html'. If this isn't provided, the system will use 'flatpages/default.html'."))
     show_in_menu = models.BooleanField(_('show in menu'), default=True)
     is_public = models.BooleanField(_('is public'), default=True)
-    protected = models.BooleanField(_('protected'), default=False)
+    protected = models.BooleanField(_('protected'), default=False, help_text=_("If this is checked, only logged-in users will be able to view the page."))
     content_items = models.ManyToManyField(ContentItem, through='PageContentItem', verbose_name=_('content items'))
     metadata = JSONField(blank=True, null=True, schema=METADATA_PAGE_SCHEMA, prefill_from='fiber.models.Page')
 
