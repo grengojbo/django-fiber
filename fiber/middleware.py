@@ -45,8 +45,6 @@ class AdminPageMiddleware(object):
                 if is_login:
                     # Only show the login window once
                     request.session['show_fiber_admin'] = False
-
-                    fiber_data['show_login'] = True
                 else:
                     if self.is_django_admin(request):
                         fiber_data['backend'] = True
@@ -63,10 +61,8 @@ class AdminPageMiddleware(object):
                         })
 
                         # Inject admin html in body.
-                        response.content = self.body_re.sub(
-                            r"<head>\g<IN_HEAD></head>\g<AFTER_HEAD><body\g<IN_BODY_TAG>>%s\g<BODY_CONTENTS></body>" % ('<div id="wpr-body">',),
-                            smart_unicode(response.content)
-                        ).replace('</body>', '</div>' + t.render(c) + '</body>')
+                        response.content = self.inject_html(response.content, body='<div id="wpr-body">')\
+                            .replace('</body>', '</div>' + t.render(c) + '</body>')
 
                         fiber_data['frontend'] = True
                         try:
@@ -76,15 +72,15 @@ class AdminPageMiddleware(object):
 
                 # Inject header html in head.
                 # Add fiber-data attribute to body tag.
-                response.content = self.body_re.sub(
-                    r"<head>\g<IN_HEAD>%s</head>\g<AFTER_HEAD><body data-fiber-data='%s'\g<IN_BODY_TAG>>\g<BODY_CONTENTS></body>" % (
-                        self.get_header_html(request),
-                        simplejson.dumps(fiber_data),
-                    ),
-                    smart_unicode(response.content)
-                )
+                response.content = self.inject_html(response.content, header=self.get_header_html(request, is_login))
 
         return response
+
+    def inject_html(self, html, header='', body=''):
+        return self.body_re.sub(
+            r"<head>\g<IN_HEAD>%s</head>\g<AFTER_HEAD><body data-fiber-data='%s'\g<IN_BODY_TAG>>\g<BODY_CONTENTS></body>" % (header, body),
+            smart_unicode(html)
+        )
 
     def set_login_session(self, request, response):
         """
@@ -150,7 +146,7 @@ class AdminPageMiddleware(object):
     def is_django_admin(self, request):
         return re.search(r'^%s' % (reverse('admin:index').lstrip('/')), request.path_info.lstrip('/'))
 
-    def get_header_html(self, request):
+    def get_header_html(self, request, must_login):
         t = loader.get_template('fiber/header.html')
         c = RequestContext(
             request,
@@ -158,7 +154,8 @@ class AdminPageMiddleware(object):
                 'editor_template_js': self.editor_settings.get('template_js'),
                 'editor_template_css': self.editor_settings.get('template_css'),
                 'BACKEND_BASE_URL': reverse('admin:index'),
-                'FIBER_LOGIN_URL': reverse('fiber_login'),
+                'must_login': must_login,
+                'login_url': reverse('fiber_login')
             },
         )
         return t.render(c)

@@ -47,7 +47,8 @@ runWithFiberJQuery(($) ->
         when: {}
 
         initialize: ->
-            @model.on('change', @tryRender, this)
+            if @model
+                @model.on('change', @tryRender, this)
 
             @is_displayed = false
 
@@ -102,4 +103,34 @@ runWithFiberJQuery(($) ->
                 @$el.hide()
 
     Util.ConditionalDisplayView = ConditionalDisplayView
+
+
+    class ModalFormView extends ConditionalDisplayView
+        events:
+            'click .submit': 'submit'
+            'click .close': 'close'
+            'click .cancel': 'close'
+
+        render: ->
+            @$el.modal()
+
+        getForm: ->
+            return @$el.find('form')
+
+        submit: ->
+            @getForm().ajaxSubmit(
+                success: $.proxy(@handleSubmitSuccess, this)
+                error: $.proxy(@handleSubmitError, this)
+            )
+
+        handleSubmitSuccess: (response) ->
+            # override
+
+        handleSubmitError: (response) ->
+            @getForm().replaceWith(response.responseText)
+
+        close: ->
+            @$el.modal('hide')
+
+    Util.ModalFormView = ModalFormView
 )

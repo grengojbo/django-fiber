@@ -9,6 +9,7 @@ env = Environment('js', 'js')
 coffee_bundle = Bundle(
     'util.coffee',
     'fiber.coffee',
+    'login.coffee',
     filters='coffeescript',
     output='fiber.js'
 )

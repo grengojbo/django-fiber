@@ -1,36 +1,27 @@
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth import authenticate, login
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import simplejson
-from django.utils.translation import ugettext as _
+from django.contrib.auth.views import login as auth_login
 
 from .models import Page
 
 
 def fiber_login(request):
-    username = request.POST['username']
-    password = request.POST['password']
-    user = authenticate(username=username, password=password)
+    response = auth_login(request, template_name = 'fiber/login.html')
 
-    result = {}
-    if user is not None:
-        if user.is_active:
-            login(request, user)
-            result = {
-                'status': 'success',
-            }
-        else:
-            result = {
-                'status': 'inactive',
-                'message': _('This account is inactive.'),
-            }
+    if request.method != 'POST':
+        # Initial request
+        return response
+    elif response.status_code == 200:
+        # Login failed; return response with error status
+        response.status_code = 400
+        return response
+    elif response.status_code == 302:
+        # Login successfull; return response with success status
+        return HttpResponse()
     else:
-            result = {
-                'status': 'failed',
-                'message': _('Please enter a correct username and password. Note that both fields are case-sensitive.'),
-            }
-    json = simplejson.dumps(result)
-    return HttpResponse(json, mimetype='application/json')
+        # Unknown status
+        return response
 
 
 @staff_member_required

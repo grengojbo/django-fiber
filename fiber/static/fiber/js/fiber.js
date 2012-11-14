@@ -23,7 +23,7 @@ runWithFiberJQuery = function(f) {
 Util = {};
 
 runWithFiberJQuery(function($) {
-  var ConditionalDisplayView, templates;
+  var ConditionalDisplayView, ModalFormView, templates;
   templates = {};
   Util.get_template = function(template_id) {
     var template;
@@ -55,7 +55,9 @@ runWithFiberJQuery(function($) {
     ConditionalDisplayView.prototype.when = {};
 
     ConditionalDisplayView.prototype.initialize = function() {
-      this.model.on('change', this.tryRender, this);
+      if (this.model) {
+        this.model.on('change', this.tryRender, this);
+      }
       return this.is_displayed = false;
     };
 
@@ -128,87 +130,76 @@ runWithFiberJQuery(function($) {
     return ConditionalDisplayView;
 
   })(Backbone.View);
-  return Util.ConditionalDisplayView = ConditionalDisplayView;
-});
+  Util.ConditionalDisplayView = ConditionalDisplayView;
+  ModalFormView = (function(_super) {
 
-var __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+    __extends(ModalFormView, _super);
 
-runWithFiberJQuery(function($) {
-  var ContentTreeView, ContextMenuView, LoginView, ModalView, PageTreeView, SidebarView, ui_state;
-  ui_state = new Backbone.Model();
-  ModalView = (function(_super) {
-
-    __extends(ModalView, _super);
-
-    function ModalView() {
-      return ModalView.__super__.constructor.apply(this, arguments);
+    function ModalFormView() {
+      return ModalFormView.__super__.constructor.apply(this, arguments);
     }
 
-    ModalView.prototype.events = {
-      'click .submit': 'submit'
+    ModalFormView.prototype.events = {
+      'click .submit': 'submit',
+      'click .close': 'close',
+      'click .cancel': 'close'
     };
 
-    ModalView.prototype.render = function() {
+    ModalFormView.prototype.render = function() {
       return this.$el.modal();
     };
 
-    ModalView.prototype.getForm = function() {
+    ModalFormView.prototype.getForm = function() {
       return this.$el.find('form');
     };
 
-    ModalView.prototype.submit = function() {
+    ModalFormView.prototype.submit = function() {
       return this.getForm().ajaxSubmit({
         success: $.proxy(this.handleSubmitSuccess, this),
         error: $.proxy(this.handleSubmitError, this)
       });
     };
 
-    ModalView.prototype.handleSubmitSuccess = function(response) {};
+    ModalFormView.prototype.handleSubmitSuccess = function(response) {};
 
-    ModalView.prototype.handleSubmitError = function(response) {
+    ModalFormView.prototype.handleSubmitError = function(response) {
       return this.getForm().replaceWith(response.responseText);
     };
 
-    return ModalView;
-
-  })(Backbone.View);
-  LoginView = (function(_super) {
-
-    __extends(LoginView, _super);
-
-    function LoginView() {
-      return LoginView.__super__.constructor.apply(this, arguments);
-    }
-
-    LoginView.prototype.render = function() {
-      var $el, html;
-      html = "<div id=\"login-form\" class=\"modal hide\" data-remote=\"" + FIBER_LOGIN_URL + "\">";
-      $el = $(html).appendTo('body');
-      this.setElement($el);
-      Util.render_template(this.$el, 'login-template');
-      return LoginView.__super__.render.call(this);
+    ModalFormView.prototype.close = function() {
+      return this.$el.modal('hide');
     };
 
-    LoginView.prototype.handleSubmitSuccess = function(response) {
-      return window.location = '/';
-    };
+    return ModalFormView;
 
-    return LoginView;
+  })(ConditionalDisplayView);
+  return Util.ModalFormView = ModalFormView;
+});
 
-  })(ModalView);
+var __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+this.Fiber = {};
+
+runWithFiberJQuery(function($) {
+  var ContentTreeView, ContextMenuView, EditPageView, FiberRouter, PageTreeView, SidebarView;
   SidebarView = (function(_super) {
 
     __extends(SidebarView, _super);
 
-    function SidebarView() {
-      return SidebarView.__super__.constructor.apply(this, arguments);
+    function SidebarView(options) {
+      this.model = options.model;
+      SidebarView.__super__.constructor.call(this);
     }
 
     SidebarView.prototype.initialize = function() {
       this.setElement($('#df-wpr-sidebar'));
-      new PageTreeView();
-      return new ContentTreeView();
+      new PageTreeView({
+        model: this.model
+      });
+      return new ContentTreeView({
+        model: this.model
+      });
     };
 
     return SidebarView;
@@ -218,8 +209,9 @@ runWithFiberJQuery(function($) {
 
     __extends(PageTreeView, _super);
 
-    function PageTreeView() {
-      return PageTreeView.__super__.constructor.apply(this, arguments);
+    function PageTreeView(options) {
+      this.model = options.model;
+      PageTreeView.__super__.constructor.call(this);
     }
 
     PageTreeView.prototype.initialize = function() {
@@ -274,16 +266,17 @@ runWithFiberJQuery(function($) {
       items = [
         {
           title: 'Edit',
-          url: "#edit"
+          url: "#edit-page/" + node.id
         }, {
-          title: 'Delete'
+          title: 'Delete',
+          url: "#delete-page/" + node.id
         }
       ];
       context_menu = {
         position: position,
         items: items
       };
-      return ui_state.set({
+      return this.model.set({
         'context_menu': context_menu
       });
     };
@@ -295,8 +288,9 @@ runWithFiberJQuery(function($) {
 
     __extends(ContentTreeView, _super);
 
-    function ContentTreeView() {
-      return ContentTreeView.__super__.constructor.apply(this, arguments);
+    function ContentTreeView(options) {
+      this.model = options.model;
+      ContentTreeView.__super__.constructor.call(this);
     }
 
     ContentTreeView.prototype.initialize = function() {
@@ -319,10 +313,6 @@ runWithFiberJQuery(function($) {
 
     __extends(ContextMenuView, _super);
 
-    function ContextMenuView() {
-      return ContextMenuView.__super__.constructor.apply(this, arguments);
-    }
-
     ContextMenuView.prototype.when = {
       context_menu__has_value: true
     };
@@ -331,11 +321,16 @@ runWithFiberJQuery(function($) {
       'click a': 'handleClick'
     };
 
+    function ContextMenuView(options) {
+      this.model = options.model;
+      ContextMenuView.__super__.constructor.call(this);
+    }
+
     ContextMenuView.prototype.initialize = function() {
-      this.model = ui_state;
+      var _this = this;
       ContextMenuView.__super__.initialize.call(this);
       return $('html, body').bind('click contextmenu', function() {
-        return ui_state.set('context_menu', null);
+        return _this.model.set('context_menu', null);
       });
     };
 
@@ -378,16 +373,100 @@ runWithFiberJQuery(function($) {
     return ContextMenuView;
 
   })(Util.ConditionalDisplayView);
-  return $(function() {
-    var fiber_data;
-    fiber_data = $('body').data('fiber-data');
-    if (fiber_data) {
-      if (fiber_data.show_login) {
-        return new LoginView().render();
-      } else {
-        new SidebarView();
-        return new ContextMenuView();
-      }
+  EditPageView = (function(_super) {
+
+    __extends(EditPageView, _super);
+
+    function EditPageView() {
+      return EditPageView.__super__.constructor.apply(this, arguments);
     }
-  });
+
+    EditPageView.prototype.when = {
+      mode: 'edit_page'
+    };
+
+    EditPageView.prototype.render = console.log('render EditPageView');
+
+    return EditPageView;
+
+  })(Util.ModalFormView);
+  FiberRouter = (function(_super) {
+
+    __extends(FiberRouter, _super);
+
+    function FiberRouter() {
+      return FiberRouter.__super__.constructor.apply(this, arguments);
+    }
+
+    FiberRouter.prototype.routes = {
+      'edit-page/:page_id': 'editPage'
+    };
+
+    FiberRouter.prototype.initialize = function(options) {
+      this.model = options.model;
+      return Backbone.history.start();
+    };
+
+    FiberRouter.prototype.editPage = function(page_id) {
+      return this.model.set({
+        mode: 'edit_page'
+      });
+    };
+
+    return FiberRouter;
+
+  })(Backbone.Router);
+  return Fiber.init_admin = function() {
+    var ui_state;
+    ui_state = new Backbone.Model();
+    new FiberRouter({
+      model: ui_state
+    });
+    new SidebarView({
+      model: ui_state
+    });
+    new ContextMenuView({
+      model: ui_state
+    });
+    return new EditPageView({
+      model: ui_state
+    });
+  };
+});
+
+var __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+runWithFiberJQuery(function($) {
+  var LoginView;
+  LoginView = (function(_super) {
+
+    __extends(LoginView, _super);
+
+    function LoginView(options) {
+      this.login_url = options.login_url;
+      LoginView.__super__.constructor.call(this, options);
+    }
+
+    LoginView.prototype.render = function() {
+      var $el, html;
+      html = "<div id=\"login-form\" class=\"modal hide\" data-remote=\"" + this.login_url + "\">";
+      $el = $(html).appendTo('body');
+      this.setElement($el);
+      Util.render_template(this.$el, 'login-template');
+      return LoginView.__super__.render.call(this);
+    };
+
+    LoginView.prototype.handleSubmitSuccess = function(response) {
+      return window.location = '/';
+    };
+
+    return LoginView;
+
+  })(Util.ModalFormView);
+  return Fiber.display_login = function(login_url) {
+    return new LoginView({
+      login_url: login_url
+    }).render();
+  };
 });
