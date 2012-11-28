@@ -149,7 +149,6 @@ class AdminPageMiddleware(object):
         #    return False
 
         # added by anton@ignaz.at
-        #import ipdb; ipdb.set_trace()
         if request.user.groups and request.user.groups.filter(name=FIBER_PERMISSION_GROUP).count() == 0:
             return False
 
