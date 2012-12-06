@@ -1,0 +1,2 @@
+webassets==0.8
+django-assets==0.8
