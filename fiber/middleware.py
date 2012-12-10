@@ -25,104 +25,45 @@ class AdminPageMiddleware(object):
         # only process html and xhtml responses
         if response['Content-Type'].split(';')[0] not in ('text/html', 'application/xhtml+xml'):
             return response
-        if self.set_login_session(request, response):
-            request.session['show_fiber_admin'] = True
-            url_without_fiber = request.path_info.replace(LOGIN_STRING, '')
-            querystring_without_fiber = ''
-            if request.META['QUERY_STRING']:
-                querystring_without_fiber = request.META['QUERY_STRING'].replace(LOGIN_STRING, '')
-            if (querystring_without_fiber != ''):
-                querystring = '?%s' % querystring_without_fiber
-            else:
-                querystring = ''
 
-            return HttpResponseRedirect('%s%s' % (url_without_fiber, querystring))
+        elif self.is_login_url(request):
+            return self.redirect_to_fiber_admin(request)
+        elif self.must_display_admin(request, response):
+            return self.inject_fiber_admin(request, response)
         else:
+            return response
+
+    def inject_html(self, html, header='', body_prepend='', body_append='', fiber_data=None):
+        """
+        Inject html.
+
+        - header: will be appended to the header
+        - body_prepend: will be prepended to the body
+        - body_append: will be appended to the body
+        - fiber_data: will be serialized to json and put in 'data-fiber-data' element
+        """
+        if not fiber_data:
             fiber_data = {}
 
-            is_login = self.show_login(request, response)
-            if is_login or self.show_admin(request, response):
-                if is_login:
-                    # Only show the login window once
-                    request.session['show_fiber_admin'] = False
-                else:
-                    if self.is_django_admin(request):
-                        fiber_data['backend'] = True
-                    else:
-                        t = loader.get_template('fiber/admin.html')
-                        c = RequestContext(request, {
-                            'logout_url': self.get_logout_url(request),
-                            'pages_json': simplejson.dumps(
-                                Page.objects.create_jqtree_data(request.user)
-                            ),
-                            'content_items_json': simplejson.dumps(
-                                ContentItem.objects.get_content_groups(request.user)
-                            )
-                        })
-
-                        # Inject admin html in body.
-                        response.content = self.inject_html(response.content, body='<div id="wpr-body">')\
-                            .replace('</body>', '</div>' + t.render(c) + '</body>')
-
-                        fiber_data['frontend'] = True
-                        try:
-                            fiber_data['page_id'] = Page.objects.get_by_url(request.path_info).pk
-                        except AttributeError:
-                            pass
-
-                # Inject header html in head.
-                # Add fiber-data attribute to body tag.
-                response.content = self.inject_html(response.content, header=self.get_header_html(request, is_login))
-
-        return response
-
-    def inject_html(self, html, header='', body=''):
         return self.body_re.sub(
-            r"<head>\g<IN_HEAD>%s</head>\g<AFTER_HEAD><body data-fiber-data='%s'\g<IN_BODY_TAG>>\g<BODY_CONTENTS></body>" % (header, body),
+            r"<head>\g<IN_HEAD>%s</head>\g<AFTER_HEAD><body data-fiber-data='%s'\g<IN_BODY_TAG>>%s\g<BODY_CONTENTS>%s</body>" % (header, simplejson.dumps(fiber_data), body_prepend, body_append),
             smart_unicode(html)
         )
 
-    def set_login_session(self, request, response):
+    def is_login_url(self, request):
         """
-        Only set the fiber show_login session when the request
-        - has LOGIN_STRING (defaults to @fiber) behind its request-url
+        Is this the login url? By default this is '@fiber'.
         """
-        if response['Content-Type'].split(';')[0] not in ('text/html', 'application/xhtml+xml'):
-            return False
-        if not (request.path_info.endswith(LOGIN_STRING) or (request.META['QUERY_STRING'] and request.META['QUERY_STRING'].endswith(LOGIN_STRING))):
-            return False
-        else:
-            return True
+        path_info = request.path_info
+        query_string = request.META['QUERY_STRING'] or ''
 
-    def show_login(self, request, response):
-        """
-        Only show the Fiber login interface when the request
-        - is not performed by an admin user
-        - has session key show_fiber_admin = True
-        - has a response which is either 'text/html' or 'application/xhtml+xml'
-        """
-        if response['Content-Type'].split(';')[0] not in ('text/html', 'application/xhtml+xml'):
-            return False
-        try:
-            if request.user.is_staff:
-                return False
-        except AttributeError:
-            pass
-        try:
-            if not request.session['show_fiber_admin'] == True:
-                return False
-        except AttributeError:
-            return False
-        except KeyError:
-            return False
-        else:
-            return True
+        return path_info.endswith(LOGIN_STRING) or query_string.endswith(LOGIN_STRING)
 
-    def show_admin(self, request, response):
+    def must_display_admin(self, request, response):
         """
-        Only show the Fiber admin interface when the request
+        Must the fiber admin be displayed?
         - has a response status code of 200
-        - is performed by an admin user
+        - is performed by an admin user or the session contains 'show_fiber_admin'
         - has a response which is either 'text/html' or 'application/xhtml+xml'
         - is not an AJAX request
         - does not match EXCLUDE_URLS (empty by default)
@@ -130,8 +71,6 @@ class AdminPageMiddleware(object):
         if response.status_code != 200:
             return False
         if not hasattr(request, 'user'):
-            return False
-        if not request.user.is_staff:
             return False
         if response['Content-Type'].split(';')[0] not in ('text/html', 'application/xhtml+xml'):
             return False
@@ -141,12 +80,16 @@ class AdminPageMiddleware(object):
             for exclude_url in EXCLUDE_URLS:
                 if re.search(exclude_url, request.path_info.lstrip('/')):
                     return False
-        return True
+
+        return (
+            request.session.get('show_fiber_admin') or
+            hasattr(request, 'user') and request.user.is_staff
+        )
 
     def is_django_admin(self, request):
         return re.search(r'^%s' % (reverse('admin:index').lstrip('/')), request.path_info.lstrip('/'))
 
-    def get_header_html(self, request, must_login):
+    def get_header_html(self, request):
         t = loader.get_template('fiber/header.html')
         c = RequestContext(
             request,
@@ -154,8 +97,6 @@ class AdminPageMiddleware(object):
                 'editor_template_js': self.editor_settings.get('template_js'),
                 'editor_template_css': self.editor_settings.get('template_css'),
                 'BACKEND_BASE_URL': reverse('admin:index'),
-                'must_login': must_login,
-                'login_url': reverse('fiber_login')
             },
         )
         return t.render(c)
@@ -168,6 +109,76 @@ class AdminPageMiddleware(object):
 
     def get_editor_settings(self):
         return import_element(EDITOR)
+
+    def redirect_to_fiber_admin(self, request):
+        """
+        Redirect to page with fiber admin. This is done by setting 'show_fiber_admin' in the session and redirecting to the same page.
+
+        The result is a http response.
+        """
+        request.session['show_fiber_admin'] = True
+        url_without_fiber = request.path_info.replace(LOGIN_STRING, '')
+        querystring_without_fiber = ''
+        if request.META['QUERY_STRING']:
+            querystring_without_fiber = request.META['QUERY_STRING'].replace(LOGIN_STRING, '')
+        if querystring_without_fiber:
+            querystring = '?%s' % querystring_without_fiber
+        else:
+            querystring = ''
+
+        return HttpResponseRedirect('%s%s' % (url_without_fiber, querystring))
+
+    def inject_fiber_admin(self, request, response):
+        """
+        Injects the fiber admin. Returns http response.
+        """
+        # Show the login window once
+        request.session['show_fiber_admin'] = False
+
+        logged_in=request.user.is_staff
+
+        fiber_data = dict(
+            logged_in=logged_in,
+            login_url=reverse('fiber_login'),
+        )
+        body_prepend = ''
+        body_append = ''
+
+        if self.is_django_admin(request):
+            fiber_data['backend'] = True
+        elif not logged_in:
+            fiber_data['frontend'] = True
+        else:
+            t = loader.get_template('fiber/admin.html')
+            c = RequestContext(request, {
+                'logout_url': self.get_logout_url(request),
+                'pages_json': simplejson.dumps(
+                    Page.objects.create_jqtree_data(request.user)
+                ),
+                'content_items_json': simplejson.dumps(
+                    ContentItem.objects.get_content_groups(request.user)
+                )
+            })
+
+            body_prepend = '<div id="wpr-body">'
+            body_append = '</div>%s' % t.render(c)
+
+            fiber_data['frontend'] = True
+            try:
+                fiber_data['page_id'] = Page.objects.get_by_url(request.path_info).pk
+            except AttributeError:
+                pass
+
+        # Inject header and body.
+        # Add fiber-data attribute to body tag.
+        response.content = self.inject_html(
+            response.content,
+            header=self.get_header_html(request),
+            body_prepend=body_prepend,
+            body_append=body_append,
+            fiber_data=fiber_data
+        )
+        return response
 
 
 class ObfuscateEmailAddressMiddleware(object):

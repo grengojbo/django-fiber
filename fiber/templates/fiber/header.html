@@ -14,11 +14,7 @@
 
 <script>
     $(function() {
-        {% if must_login %}
-            Fiber.display_login('{{ login_url }}');
-        {% else %}
-            Fiber.init_admin();
-        {% endif %}
+        Fiber.init_admin();
     });
 </script>
 

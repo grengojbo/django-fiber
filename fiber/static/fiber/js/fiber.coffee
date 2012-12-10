@@ -156,11 +156,34 @@ runWithFiberJQuery(($) ->
             mode: 'edit_page'
 
         render:
-            console.log('render EditPageView')
+            x = 0
+
+
+    class LoginView extends Util.ModalFormView
+        when:
+            mode: 'login'
+
+        constructor: (options) ->
+            @model = options.model
+
+            super(options)
+
+        renderOnce: ->
+            login_url = @model.get('fiber_data').login_url
+            html = "<div id=\"login-form\" class=\"modal hide\" data-remote=\"#{ login_url }\">"
+            $el = $(html).appendTo('body')
+            @setElement($el)
+
+            Util.render_template(@$el, 'login-template')
+
+        handleSubmitSuccess: (response) ->
+            window.location = '/'    
 
 
     class FiberRouter extends Backbone.Router
         routes:
+            '': 'index'
+            'login': 'login'
             'edit-page/:page_id': 'editPage'
 
         initialize: (options) ->
@@ -169,14 +192,28 @@ runWithFiberJQuery(($) ->
             Backbone.history.start()
 
         editPage: (page_id) ->
-            @model.set(mode: 'edit_page')
+            @model.set('mode': 'edit_page')
+
+        login: ->
+            @model.set('mode': 'login')
+
+        index: ->
+            @model.set('mode': 'index')
 
 
     Fiber.init_admin = ->
-        ui_state = new Backbone.Model()
+        fiber_data = $('body').data('fiber-data')
+
+        ui_state = new Backbone.Model(
+            'fiber_data': fiber_data
+        )
 
         new FiberRouter(model: ui_state)
         new SidebarView(model: ui_state)
         new ContextMenuView(model: ui_state)
         new EditPageView(model: ui_state)
+        new LoginView(model: ui_state)
+
+        if not fiber_data.logged_in
+            Backbone.history.navigate('login', trigger: true)
 )
