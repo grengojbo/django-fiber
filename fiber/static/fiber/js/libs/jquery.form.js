@@ -165,7 +165,6 @@ $.fn.ajaxSubmit = function(options) {
     }
 
     options.success = function(data, status, xhr) { // jQuery 1.4+ passes xhr as 3rd arg
-        console.log('success');
         var context = options.context || this ;    // jQuery 1.4+ supports scope context 
         for (var i=0, max=callbacks.length; i < max; i++) {
             callbacks[i].apply(context, [data, status, xhr || $form, $form]);

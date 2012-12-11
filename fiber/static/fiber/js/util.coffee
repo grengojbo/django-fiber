@@ -72,7 +72,7 @@ runWithFiberJQuery(($) ->
                     @is_rendered = true
                     @renderOnce()
 
-                @show()
+                @handleShow()
                 @render()
 
         renderOnce: ->
@@ -111,8 +111,11 @@ runWithFiberJQuery(($) ->
             'click .close': 'close'
             'click .cancel': 'close'
 
-        render: ->
+        show: ->
             @$el.modal()
+
+        hide: ->
+            @$el.modal('hide')
 
         getForm: ->
             return @$el.find('form')
@@ -130,7 +133,7 @@ runWithFiberJQuery(($) ->
             @getForm().replaceWith(response.responseText)
 
         close: ->
-            @$el.modal('hide')
+            @hide()
 
     Util.ModalFormView = ModalFormView
 )

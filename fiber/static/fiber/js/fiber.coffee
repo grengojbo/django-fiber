@@ -39,6 +39,7 @@ runWithFiberJQuery(($) ->
             )
 
             @$el.bind('tree.contextmenu', $.proxy(@handleContextMenu, this))
+            @$el.bind('tree.click', $.proxy(@handleClick, this))
 
         createLi: (node, $li) ->
             if node.change_url
@@ -78,6 +79,12 @@ runWithFiberJQuery(($) ->
                 items: items
 
             @model.set('context_menu': context_menu)
+
+        handleClick: (e) ->
+            node = e.node
+
+            if node.url
+                window.location = node.url
 
 
     class ContentTreeView extends Backbone.View
@@ -144,6 +151,7 @@ runWithFiberJQuery(($) ->
 
         hide: ->
             @remove()
+            super()
 
         remove: ->
             if @$el
@@ -155,8 +163,35 @@ runWithFiberJQuery(($) ->
         when:
             mode: 'edit_page'
 
-        render:
-            x = 0
+        renderOnce: ->
+            html = "<div id=\"edit-page\" class=\"modal hide\"></div>"
+            $el = $(html).appendTo('body')
+            @setElement($el)
+
+            Util.render_template(
+                @$el,
+                'modal-template',
+                    title: 'Edit page'
+                    submit_title: 'Save'
+            )
+
+        render: ->
+            $body = @$el.find('.modal-body')
+            url = @getUrl()
+            $body.load("#{ url } #page_form", $.proxy(@initForm, this))
+
+            super()
+
+        getUrl: ->
+            page_id = @model.get('page_id')
+            return "/admin/fiber/fiber_admin/fiber/page/#{ page_id }/"
+
+        initForm: ->
+            @$el.find('div.submit-row').remove()
+            @$el.find('form').attr('action', @getUrl())
+
+        handleSubmitSuccess: (response) ->
+            Backbone.history.navigate('', trigger: true)
 
 
     class LoginView extends Util.ModalFormView
@@ -170,14 +205,19 @@ runWithFiberJQuery(($) ->
 
         renderOnce: ->
             login_url = @model.get('fiber_data').login_url
-            html = "<div id=\"login-form\" class=\"modal hide\" data-remote=\"#{ login_url }\">"
+            html = "<div id=\"login-form\" class=\"modal hide\" data-remote=\"#{ login_url }\"></div>"
             $el = $(html).appendTo('body')
             @setElement($el)
 
-            Util.render_template(@$el, 'login-template')
+            Util.render_template(
+                @$el,
+                'modal-template',
+                    title: 'Fiber login'
+                    submit_title: 'Login'
+            )
 
         handleSubmitSuccess: (response) ->
-            window.location = '/'    
+            window.location = '/'
 
 
     class FiberRouter extends Backbone.Router
@@ -192,7 +232,11 @@ runWithFiberJQuery(($) ->
             Backbone.history.start()
 
         editPage: (page_id) ->
-            @model.set('mode': 'edit_page')
+            @model.set(
+                'mode': 'edit_page'
+                'page_id': page_id
+                'context_menu': null
+            )
 
         login: ->
             @model.set('mode': 'login')
@@ -208,11 +252,12 @@ runWithFiberJQuery(($) ->
             'fiber_data': fiber_data
         )
 
-        new FiberRouter(model: ui_state)
         new SidebarView(model: ui_state)
         new ContextMenuView(model: ui_state)
         new EditPageView(model: ui_state)
         new LoginView(model: ui_state)
+
+        new FiberRouter(model: ui_state)
 
         if not fiber_data.logged_in
             Backbone.history.navigate('login', trigger: true)
