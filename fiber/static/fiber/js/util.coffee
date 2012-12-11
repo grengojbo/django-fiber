@@ -117,6 +117,18 @@ runWithFiberJQuery(($) ->
         hide: ->
             @$el.modal('hide')
 
+        renderOnce: ->
+            html = "<div id=\"#{ @id }\" class=\"modal hide\"></div>"
+            $el = $(html).appendTo('body')
+            @setElement($el)
+
+            Util.render_template(
+                @$el,
+                'modal-template',
+                    title: @title
+                    submit_title: @submit_title
+            )
+
         getForm: ->
             return @$el.find('form')
 
