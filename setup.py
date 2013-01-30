@@ -19,11 +19,11 @@ setup(
     install_requires=[
         'django-mptt==0.5.1',
         'django-compressor>=0.7.1',
-        'djangorestframework==0.3.3'
+        'djangorestframework==2.1.12'
     ],
 
     description='Django Fiber - a simple, user-friendly CMS for all your Django projects',
-    long_description=open('README.rst').read(),
+    long_description=open('README.md').read(),
 
     author='Dennis Bunskoek',
     author_email='dbunskoek@leukeleu.nl',
