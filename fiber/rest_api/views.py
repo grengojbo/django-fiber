@@ -12,7 +12,6 @@ from rest_framework import permissions
 from fiber.models import Page, PageContentItem, ContentItem, File, Image
 from fiber.app_settings import API_RENDER_HTML, PERMISSION_CLASS
 from fiber.utils import class_loader
-#from .forms import MovePageForm, MovePageContentItemForm
 
 from .serializers import PageSerializer, MovePageSerializer, PageContentItemSerializer, MovePageContentItemSerializer, ContentItemSerializer, FileSerializer, ImageSerializer, FiberPaginationSerializer
 
@@ -156,8 +155,20 @@ class FileList(FiberListCreateAPIView):
         return qs
 
 
-class ImageListView(PaginatedListView):
+class FileDetail(generics.RetrieveUpdateDestroyAPIView):
+    model = File
+    serializer_class = FileSerializer
+    renderer_classes = API_RENDERERS
+    permission_classes = (permissions.IsAdminUser,)
 
+
+class ImageList(FiberListCreateAPIView):
+    model = Image
+    serializer_class = ImageSerializer
+    renderer_classes = API_RENDERERS
+    permission_classes = (permissions.IsAdminUser,)
+    pagination_serializer_class = FiberPaginationSerializer
+    paginate_by = 5
     orderable_fields = ('filename', 'size', 'updated')
 
     def check_fields(self, order_by):
@@ -187,10 +198,12 @@ class ImageListView(PaginatedListView):
         return qs
 
 
-class InstanceView(InstanceModelView):
+class ImageDetail(generics.RetrieveUpdateDestroyAPIView):
+    model = Image
+    serializer_class = ImageSerializer
+    renderer_classes = API_RENDERERS
+    permission_classes = (permissions.IsAdminUser,)
 
-    permissions = (IsAuthenticated, )
-    renderers = API_RENDERERS
 
 @api_view(('GET',))
 @renderer_classes(API_RENDERERS)
@@ -209,43 +222,12 @@ def api_root(request, format='None'):
     })
 
 
-class MovePageView(View):
+class PageTree(views.APIView):
+    renderer_classes = API_RENDERERS
+    permission_classes = (permissions.IsAdminUser,)
 
-    permissions = (IsAuthenticated, )
-    renderers = API_RENDERERS
-
-    form = MovePageForm
-
-    def get(self, request, pk):
-        if not PERMISSIONS.can_move_page(self.request.user, Page.objects.get(id=pk)):
-            raise _403_FORBIDDEN_RESPONSE
-        return 'Exposes the `Page.move_page` method'
-
-    def put(self, request, pk):
-        if not PERMISSIONS.can_move_page(self.request.user, Page.objects.get(id=pk)):
-            raise _403_FORBIDDEN_RESPONSE
-        position = self.CONTENT['position']
-        target = self.CONTENT['target_node_id']
-        page = Page.objects.get(id=pk)
-        page.move_page(target, position)
-
-
-class MovePageContentItemView(View):
-
-    permissions = (IsAuthenticated, )
-    renderers = API_RENDERERS
-
-    form = MovePageContentItemForm
-
-    def get(self, request, pk):
-        if not PERMISSIONS.can_edit(self.request.user, Page.objects.get(page_content_items__id=pk)):
-            raise _403_FORBIDDEN_RESPONSE
-        return 'Exposes the `PageContentItem.move` method'
-
-    def put(self, request, pk):
-        if not PERMISSIONS.can_edit(self.request.user, Page.objects.get(page_content_items__id=pk)):
-            raise _403_FORBIDDEN_RESPONSE
-        page_content_item = PageContentItem.objects.get(id=pk)
-        before_page_content_item_id = self.CONTENT.get('before_page_content_item_id', None)
-        block_name = self.CONTENT.get('block_name', None)
-        page_content_item.move(before_page_content_item_id, block_name)
+    def get(self, request, format=None):
+        """
+        Provide jqTree data for the PageSelect dialog.
+        """
+        return Response(Page.objects.create_jqtree_data(request.user))
