@@ -117,7 +117,7 @@ def show_menu(context, menu_name, min_level, max_level, expand=None):
     return context
 
 register.inclusion_tag('fiber/menu.html', takes_context=True)(show_menu)
-
+#register.inclusion_tag('fiber/menu.html', takes_context=True)(show_nav_menu)
 
 def show_content(context, content_item_name, item_class="content"):
     content_item = None
