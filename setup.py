@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 version = __import__('fiber').__version__
 
-if sys.argv[-1] == 'publish': # upload to pypi
+if sys.argv[-1] == 'publish':  # upload to pypi
     os.system("python setup.py register sdist upload")
     print "You probably want to also tag the version now:"
     print "  git tag -a %s -m 'version %s'" % (version, version)
@@ -17,13 +17,14 @@ setup(
     license='Apache License, Version 2.0',
 
     install_requires=[
-        'django-mptt==0.5.1',
-        'django-compressor>=0.7.1',
-        'djangorestframework==0.3.3'
+        'Pillow==1.7.8',
+        'django-mptt==0.5.5',
+        'django-compressor>=1.2',
+        'djangorestframework==2.1.17'
     ],
 
     description='Django Fiber - a simple, user-friendly CMS for all your Django projects',
-    long_description=open('README.rst').read(),
+    long_description=open('README.md').read(),
 
     author='Dennis Bunskoek',
     author_email='dbunskoek@leukeleu.nl',
