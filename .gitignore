@@ -7,3 +7,4 @@ dist
 app/bower_components
 .tmp/
 .DS_Store
+atlassian-ide-plugin.xml
