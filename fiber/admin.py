@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.contrib.admin.util import model_ngettext
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import PermissionDenied
+from modeltranslation.admin import TranslationAdmin
 
 from mptt.admin import MPTTModelAdmin
 
@@ -84,6 +85,7 @@ class ImageAdmin(FileAdmin):
 
 
 class ContentItemAdmin(UserPermissionMixin, admin.ModelAdmin):
+    group_fieldsets = True
     logger.debug('ContentItemAdmin')
     list_display = ('__unicode__',)
     form = forms.ContentItemAdminForm
@@ -94,6 +96,16 @@ class ContentItemAdmin(UserPermissionMixin, admin.ModelAdmin):
     )
     date_hierarchy = 'updated'
     search_fields = ('name', get_editor_field_name('content_html'))
+
+    class Media:
+        js = (
+            'modeltranslation/js/force_jquery.js',
+            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js',
+            'modeltranslation/js/tabbed_translation_fields.js',
+        )
+        css = {
+            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
+        }
 
 
 class PageContentItemInline(UserPermissionMixin, admin.TabularInline):
@@ -172,6 +184,9 @@ class FiberAdminContentItemAdmin(UserPermissionMixin, fiber_admin.ModelAdmin):
             logger.debug('FiberAdminContentItemAdmin: CONTENT_TEMPLATE_CHOICES')
             self.fieldsets = (
                 (None, {'classes': ('hide-label',), 'fields': (get_editor_field_name('content_html'), 'template_name', )}),
+                # (_('Content Russian'), {'classes': ('hide-label',), 'fields': ('content_html_ru', )}),
+                # (_('Content Ukrainian'), {'classes': ('hide-label',), 'fields': ('content_html_uk', )}),
+                # (_('Content English'), {'classes': ('hide-label',), 'fields': ('content_html_en', 'template_name', )}),
             )
 
 

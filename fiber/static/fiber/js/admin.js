@@ -179,7 +179,7 @@ var AdminDialog = Class.extend({
 		});
 
 		this.uiDialog.dialog('option', 'title', gettext('Action')); // TODO: dynamically fill in action
-
+        console.log('Create dialog');
 		this.uiDialog.dialog('option', 'buttons', {
 			'Action': {
 				text: 'Action', // TODO: dynamically fill in action
@@ -210,7 +210,7 @@ var AdminDialog = Class.extend({
 	advanced_fieldset_behaviour: function() {
 		var advancedFieldsets = this.admin_form.form.find('fieldset:not(fieldset:first-child)');
 		if (advancedFieldsets.length > 0) {
-
+            console.log('line 213: advanced_fieldset_behaviour');
 			advancedFieldsets.each(function() {
 				var fieldset = $(this),
 					button   = $('<a>');
@@ -498,6 +498,7 @@ var ChangeFormDialog = AdminFormDialog.extend({
 		this.admin_form = new ChangeForm({
 			url: this.options.url
 		});
+        console.log('ChangeFormDialog -> admin_form_load_success');
 		this.admin_form.admin_form_load_success = $.proxy(function() {
 			this.append_form();
 			this.advanced_fieldset_behaviour();
