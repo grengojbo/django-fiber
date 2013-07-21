@@ -17,7 +17,7 @@ PERMISSIONS = class_loader.load_class(PERMISSION_CLASS)
 register = template.Library()
 
 
-def show_menu(context, menu_name, min_level, max_level, expand=None, templates=None, class_ul="nav", class_li=None, class_active="active"):
+def show_menu(context, menu_name, min_level, max_level, expand=None, templates=None, class_ul="nav"):
 
     menu_pages = []
     needed_pages = []
@@ -114,6 +114,8 @@ def show_menu(context, menu_name, min_level, max_level, expand=None, templates=N
     context['fiber_menu_pages'] = menu_pages
     context['fiber_menu_parent_page'] = menu_parent_page
     context['fiber_menu_args'] = {'menu_name': menu_name, 'min_level': min_level, 'max_level': max_level, 'expand': expand}
+    context['templates'] = templates
+    context['class_ul'] = class_ul
     return context
 
 register.inclusion_tag('fiber/menu.html', takes_context=True)(show_menu)

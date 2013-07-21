@@ -1,17 +1,17 @@
 {% load mptt_tags fiber_tags %}
 {% if user.is_staff %}
     {% if fiber_menu_parent_page %}
-<ul class='nav' data-fiber-data='{
+<ul class='{{ class_ul }}' data-fiber-data='{
     "type": "page",
     "add_url": "{{ Page.get_add_url }}",
     "parent_id": {{ fiber_menu_parent_page.id }}
 }'>
     {% else %}
-<ul class='nav'>
+<ul class='{{ class_ul }}'>
     {% endif %}
     {% recursetree fiber_menu_pages %}
         {% if children %}
-        <li class="dropdown {{ node.title|slugify }}{% if node in fiber_current_pages %} current active{% endif %}
+        <li class="dropdown f-nav-{{ node.title|slugify }}{% if node in fiber_current_pages %} current active{% endif %}
             {% if node.is_first_child %}first{% endif %}{% if node.is_last_child %} last{% endif %}
             {% if not node.show_in_menu %}hidden-in-menu{% endif %}{% if not node.is_public %} non-public{% endif %}{% if node.redirect_page %} redirect{% endif %}">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-fiber-data='{
@@ -30,7 +30,7 @@
                     {{ children }}
                 </ul>
         {% else %}
-        <li class="{{ node.title|slugify }}{% if node in fiber_current_pages %} current active{% endif %}
+        <li class="f-nav-{{ node.title|slugify }}{% if node in fiber_current_pages %} current active{% endif %}
             {% if node.is_first_child %}first{% endif %}{% if node.is_last_child %} last{% endif %}
             {% if not node.show_in_menu %}hidden-in-menu{% endif %}{% if not node.is_public %} non-public{% endif %}{% if node.redirect_page %} redirect{% endif %}">
             <a href="{{ node.get_absolute_url }}" data-fiber-data='{
@@ -46,17 +46,17 @@
     {% endrecursetree %}
 </ul>
 {% else %}
-<ul class='nav'>
+<ul class='{{ class_ul }}'>
     {% recursetree fiber_menu_pages %}
         {% if children %}
-        <li class="dropdown {{ node.title|slugify }}{% if node in fiber_current_pages %} current active{% endif %}
+        <li class="dropdown f-nav-{{ node.title|slugify }}{% if node in fiber_current_pages %} current active{% endif %}
             {% if node.is_first_child %} first{% endif %}{% if node.is_last_child %} last{% endif %}">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ node.title }}</a>
             <ul class="dropdown-menu">
             {{ children }}
             </ul>
         {% else %}
-            <li class="{{ node.title|slugify }}{% if node in fiber_current_pages %} current active{% endif %}
+            <li class="f-nav-{{ node.title|slugify }}{% if node in fiber_current_pages %} current active{% endif %}
             {% if node.is_first_child %} first{% endif %}{% if node.is_last_child %} last{% endif %}">
             <a href="{{ node.get_absolute_url }}">{{ node.title }}</a>
         {% endif %}
