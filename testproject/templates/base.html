@@ -7,41 +7,49 @@
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title>{% block title %}{{ fiber_page.title }}{% endblock title %}</title>
     <meta name="description" content="">
-    <meta name="viewport" content="width=device-width">
+    <meta name="author" content="Oleg Dolya">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% block meta %}{% endblock meta %}
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
     {% compress css %}
       <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}" type="text/css" charset="utf-8">
-      <link rel="stylesheet" href="{% static 'css/main.css' %}" type="text/css" charset="utf-8">
+      <link rel="stylesheet" href="{% static 'css/aplication.css' %}" type="text/css" charset="utf-8">
     {% endcompress css %}
     {% block css %}{% endblock css %}
+    
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="{% static 'js/html5shiv.js' %}"></script>
+    <script src="{% static 'js/respond.min.js' %}"></script>
+    <![endif]-->
+    
     <script src="{% static 'js/vendor/modernizr-2.6.2.min.js' %}"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
-    <script>window.jQuery || document.write('<script src="{% static 'js/vendor/jquery-1.9.0.min.js' %}" type="text/javascript" charset="utf-8"><\/script>')</script>
-    {% compress js %}
-        <script src="{% static 'js/vendor/i18next-1.6.0.min.js' %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static 'js/plugins.js' %}" type="text/javascript" charset="utf-8"></script>
-    <script src="{% static 'js/main.js' %}" type="text/javascript" charset="utf-8"></script>
-    {% endcompress %}
-    {% block extrajs %}{% endblock extrajs %}
+    
+    <!-- Favicons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{% static 'ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="{% static 'ico/apple-touch-icon-114-precomposed.png">
+       <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{% static 'ico/apple-touch-icon-72-precomposed.png">
+                     <link rel="apple-touch-icon-precomposed" href="{% static 'ico/apple-touch-icon-57-precomposed.png">
+    <link rel="shortcut icon" href="{% static 'ico/favicon.png">
+    
     {% block extrahead %}{% endblock extrahead %}
 </head>
-<body class="bs-docs-home {% block body_class %}{{ fiber_page.title|slugify }}{% endblock %}">
+<body class="jbo-home {% block body_class %}{{ fiber_page.title|slugify }}{% endblock %}">
 <!--[if lt IE 7]>
 <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
 <![endif]-->
-<div class="navbar navbar-inverse bs-docs-nav">
+<nav class="navbar navbar-inverse navbar-fixed-top jbo-nav">
   <div class="container">
-    <a href="/" class="navbar-brand">Django Fiber example</a>
+    <a href="/" class="navbar-brand">Django Fiber</a>
     <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
     </button>
     <div class="nav-collapse collapse bs-navbar-collapse">
+    {% show_menu "mainmenu" 1 1 %}
       <ul class="nav navbar-nav">
         <li class="active">
           <a href="/getting-started">Getting started</a>
@@ -50,19 +58,10 @@
           <a href="/css">CSS</a>
         </li>
         <li>
-          <a href="/components">Components</a>
-        </li>
-        <li>
-          <a href="/javascript">JavaScript</a>
-        </li>
-        <li>
-          <a href="/customize">Customize</a>
-        </li>
-      </ul>
-      <ul class="nav navbar-nav pull-right">
-      <li><span class="navbar-brand">{% trans 'Choose language' %}</span></li>
-        <li id="lang_form">
-        <form action="/i18n/setlang/" method="post" id="locale_switcher">
+        </ul>
+    </div>
+    
+    <form action="/i18n/setlang/" method="post" class='navbar-form pull-right' id="locale_switcher">
           {% csrf_token %}
           <input name="next" type="hidden" value="{{ request.path }}" />
           <select name="language" onchange="$('#locale_switcher').submit()">
@@ -74,24 +73,13 @@
             <input type="submit" value="{% trans "Change language" %}" />
           </noscript>
         </form>
-        </li>
-      </ul>
-      
-    </div>
+        <p class="navbar-text pull-right">{% trans 'Choose language' %} </p>
   </div>
-</div>
+</nav>
 
-
-
-	<div id="wpr-page">
-		<div id="page">
 			{% block header %}
-			<header>
-      
-				
-				<nav id="mainmenu" class="clearfix">
-					{% show_menu "mainmenu" 1 1 %}
-				</nav>
+			<header  class="container">
+      					
 
 			</header>
 			{% endblock header %}
@@ -130,7 +118,18 @@
 			{% endblock layout %}
 			{% block footer %}
 			{% endblock footer %}
-		</div>
-	</div>
+	{% compress js %}
+    <script src="{% static 'js/vendor/jquery-1.9.0.min.js' %}"></script>
+    <script src="{% static 'js/venor/bootstrap.min.js' %}"></script>
+    
+    <!-- Optionally enable responsive features in IE8 -->
+    <script src="{% static 'js/vendor/respond.min.js' %}"></script>
+    <script src="{% static 'js/vendor/holder.js' %}"></script>
+
+    <script src="{% static 'js/vendor/i18next-1.6.0.min.js' %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static 'js/plugins.js' %}" type="text/javascript" charset="utf-8"></script>
+    <script src="{% static 'js/main.js' %}" type="text/javascript" charset="utf-8"></script>
+    {% endcompress %}
+    {% block extrajs %}{% endblock extrajs %}
 </body>
 </html>
