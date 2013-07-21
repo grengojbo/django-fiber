@@ -1,4 +1,4 @@
-Django
+Django==1.5.1
 
 django-mptt==0.5.5
 django-compressor==1.3
@@ -28,11 +28,19 @@ pylint
 django-debug-toolbar
 django-jenkins
 
+# Fixtures
+django-whatever
+factory_boy
+
 Werkzeug
 ipython
 
 sorl-thumbnail
 django-guardian
+
+## Translation
+django-modeltranslation
+-e git+git://github.com/cypreess/django-fiber-modeltranslation.git#egg=fiber_modeltranslation
 
 ## Caching
 #redis

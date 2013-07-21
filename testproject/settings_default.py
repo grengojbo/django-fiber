@@ -14,7 +14,7 @@ import logging
 #import memcache_toolbar.panels.memcache
 
 # Your project root
-PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__) + "../../../")
+PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__) + "../../")
 
 PYTHON_VERSION = '%s.%s' % sys.version_info[:2]
 DJANGO_VERSION = django.get_version()
@@ -118,6 +118,7 @@ TEMPLATE_LOADERS = (
 
 MIDDLEWARE_CLASSES = (
     #'django.middleware.cache.UpdateCacheMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -181,8 +182,9 @@ INSTALLED_APPS = [
     'guardian',
     # 'sorl.thumbnail',
     'rest_framework',
-    # 'modeltranslation',
-    # 'fiber_modeltranslation'
+    #"django_any",
+    'modeltranslation',
+    'fiber_modeltranslation'
 ]
 
 FILE_UPLOAD_PERMISSIONS = 0664

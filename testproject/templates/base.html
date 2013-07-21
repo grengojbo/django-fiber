@@ -14,7 +14,8 @@
     {% block meta %}{% endblock meta %}
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
     {% compress css %}
-        <link rel="stylesheet" href="{% static 'css/main.css' %}" type="text/css" charset="utf-8">
+      <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}" type="text/css" charset="utf-8">
+      <link rel="stylesheet" href="{% static 'css/main.css' %}" type="text/css" charset="utf-8">
     {% endcompress css %}
     {% block css %}{% endblock css %}
     <script src="{% static 'js/vendor/modernizr-2.6.2.min.js' %}"></script>
@@ -24,31 +25,46 @@
         <script src="{% static 'js/vendor/i18next-1.6.0.min.js' %}" type="text/javascript" charset="utf-8"></script>
     <script src="{% static 'js/plugins.js' %}" type="text/javascript" charset="utf-8"></script>
     <script src="{% static 'js/main.js' %}" type="text/javascript" charset="utf-8"></script>
-    
-    <script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>
-    
     {% endcompress %}
     {% block extrajs %}{% endblock extrajs %}
     {% block extrahead %}{% endblock extrahead %}
 </head>
-<body class="{% block body_class %}{{ fiber_page.title|slugify }}{% endblock %}">
+<body class="bs-docs-home {% block body_class %}{{ fiber_page.title|slugify }}{% endblock %}">
 <!--[if lt IE 7]>
 <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
 <![endif]-->
-	<div id="wpr-page">
-		<div id="page">
-			{% block header %}
-			<header>
-				<div id="logo">Django Fiber example</div>
-				<nav id="mainmenu" class="clearfix">
-					{% show_menu "mainmenu" 1 1 %}
-				</nav>
-                
-    <div id="lang_form">
+<div class="navbar navbar-inverse bs-docs-nav">
+  <div class="container">
+    <a href="/" class="navbar-brand">Django Fiber example</a>
+    <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <div class="nav-collapse collapse bs-navbar-collapse">
+      <ul class="nav navbar-nav">
+        <li class="active">
+          <a href="/getting-started">Getting started</a>
+        </li>
+        <li>
+          <a href="/css">CSS</a>
+        </li>
+        <li>
+          <a href="/components">Components</a>
+        </li>
+        <li>
+          <a href="/javascript">JavaScript</a>
+        </li>
+        <li>
+          <a href="/customize">Customize</a>
+        </li>
+      </ul>
+      <ul class="nav navbar-nav pull-right">
+      <li><span class="navbar-brand">{% trans 'Choose language' %}</span></li>
+        <li id="lang_form">
         <form action="/i18n/setlang/" method="post" id="locale_switcher">
           {% csrf_token %}
           <input name="next" type="hidden" value="{{ request.path }}" />
-          <label>{% trans 'Choose language' %}:</label>
           <select name="language" onchange="$('#locale_switcher').submit()">
             {% for lang in LANGUAGES %}
             <option value="{{ lang.0 }}" {% if request.LANGUAGE_CODE == lang.0 %}selected{% endif %}>{{ lang.1 }}</option>
@@ -58,19 +74,24 @@
             <input type="submit" value="{% trans "Change language" %}" />
           </noscript>
         </form>
+        </li>
+      </ul>
+      
     </div>
+  </div>
+</div>
 
-<ul id="nav">
-        {% if user.is_authenticated %}
-          <li><a href="{% url 'userena_profile_list' %}"><span>{% trans 'All profiles' %}</span></a></li>
-          <li><a href="{% url 'userena_umessages_list' %}"><span>{% trans 'Messages' %}</span></a></li>
-          <li><a href="{% url 'userena_profile_detail' user.username %}"><span>{% trans 'Account' %} ({{ user.username }})</span></a></li>
-          <li><a href="{% url 'userena_signout' %}"><span>{% trans 'Signout' %}</span></a></li>
-          {% else %}
-          <li><a href="{% url 'userena_signin' %}"><span>{% trans 'Signin' %}</span></a></li>
-          <li><a href="{% url 'userena_signup' %}"><span>{% trans 'Signup' %}</span></a></li>
-          {% endif %}
-        </ul>
+
+
+	<div id="wpr-page">
+		<div id="page">
+			{% block header %}
+			<header>
+      
+				
+				<nav id="mainmenu" class="clearfix">
+					{% show_menu "mainmenu" 1 1 %}
+				</nav>
 
 			</header>
 			{% endblock header %}

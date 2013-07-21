@@ -9,3 +9,4 @@ app/bower_components
 .DS_Store
 atlassian-ide-plugin.xml
 *.log
+testproject/public/static/

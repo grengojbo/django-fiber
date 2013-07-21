@@ -106,7 +106,7 @@ CACHES = {
 # SYSTEM_EMAIL_PREFIX = "[Django-Fiber]"
 
 ## Compress
-COMPRESS_ENABLED = True
+COMPRESS_ENABLED = False
 COMPRESS_OFFLINE = False
 # COMPRESS_PRECOMPILERS = (
 #     ('text/less', 'lessc DjangoApp/base/static/less/aplication.less DjangoApp/base/static/css/aplication.css')
