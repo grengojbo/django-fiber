@@ -195,7 +195,8 @@ APPEND_SLASH = False
 
 API_RENDER_HTML = False
 FIBER_TEMPLATE_CHOICES = (
-    ('tpl-default.html', 'Default template'),
+    ('', 'Default template'),
+    ('tpl-default.html', 'Django block'),
 )
 FIBER_CONTENT_TEMPLATE_CHOICES = (
     ('', 'Default template'),
