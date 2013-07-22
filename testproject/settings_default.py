@@ -195,7 +195,8 @@ APPEND_SLASH = False
 
 API_RENDER_HTML = False
 FIBER_TEMPLATE_CHOICES = (
-    ('tpl-default.html', 'Default template'),
+    ('', 'Default template'),
+    ('tpl-example.html', 'Example template'),
 )
 FIBER_CONTENT_TEMPLATE_CHOICES = (
     ('', 'Default template'),
@@ -323,6 +324,10 @@ LOGGING = {
         },
     },
     'loggers': {
+        'fiber': {
+            'handlers': ['default', 'console'],
+            'level': 'DEBUG',
+        },
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
