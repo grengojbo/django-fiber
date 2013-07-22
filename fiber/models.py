@@ -1,3 +1,4 @@
+# -*- mode: python; coding: utf-8; -*-
 import os
 
 import warnings
@@ -84,10 +85,10 @@ class Page(MPTTModel):
     redirect_page = models.ForeignKey('self', null=True, blank=True, related_name='redirected_pages', verbose_name=_('redirect page'), on_delete=models.SET_NULL)
     mark_current_regexes = models.TextField(_('mark current regexes'), blank=True)
     # TODO: add `alias_page` field
-    template_name = models.CharField(_('template name'), blank=True, max_length=70)
+    template_name = models.CharField(_('template name'), blank=True, max_length=70, help_text=_("Example: 'flatpages_plus/contact_page.html'. If this isn't provided, the system will use 'flatpages/default.html'."))
     show_in_menu = models.BooleanField(_('show in menu'), default=True)
     is_public = models.BooleanField(_('is public'), default=True)
-    protected = models.BooleanField(_('protected'), default=False)
+    protected = models.BooleanField(_('protected'), default=False, help_text=_("If this is checked, only logged-in users will be able to view the page."))
     content_items = models.ManyToManyField(ContentItem, through='PageContentItem', verbose_name=_('content items'))
     metadata = JSONField(blank=True, null=True, schema=METADATA_PAGE_SCHEMA, prefill_from='fiber.models.Page')
 
@@ -215,13 +216,6 @@ class Page(MPTTModel):
     def is_public_for_user(self, user):
         return user.is_staff or self.is_public
 
-    def has_visible_children(self):
-        visible_children = [page for page in self.get_children() if page.show_in_menu]
-        if visible_children:
-            return True
-        else:
-            return False
-
 
 class PageContentItem(models.Model):
     content_item = models.ForeignKey(ContentItem, related_name='page_content_items', verbose_name=_('content item'))
@@ -296,7 +290,7 @@ class Image(models.Model):
         super(Image, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        self.image.storage.delete(self.image.name)
+        os.remove(os.path.join(settings.MEDIA_ROOT, str(self.image)))
         super(Image, self).delete(*args, **kwargs)
 
     def get_image_information(self):

@@ -1,3 +1,4 @@
+# -*- mode: python; coding: utf-8; -*-
 import operator
 
 from django import template
@@ -8,7 +9,7 @@ from fiber import __version__ as fiber_version_number
 from fiber.models import Page, ContentItem
 
 from fiber.utils.urls import get_admin_change_url
-from fiber.app_settings import PERMISSION_CLASS
+from fiber.app_settings import PERMISSION_CLASS, AUTO_CREATE_CONTENT_ITEMS
 from fiber.utils import class_loader
 
 PERMISSIONS = class_loader.load_class(PERMISSION_CLASS)
@@ -16,7 +17,7 @@ PERMISSIONS = class_loader.load_class(PERMISSION_CLASS)
 register = template.Library()
 
 
-def show_menu(context, menu_name, min_level, max_level, expand=None):
+def show_menu(context, menu_name, min_level, max_level, expand=None, templates=None, class_ul="nav"):
 
     menu_pages = []
     needed_pages = []
@@ -113,19 +114,34 @@ def show_menu(context, menu_name, min_level, max_level, expand=None):
     context['fiber_menu_pages'] = menu_pages
     context['fiber_menu_parent_page'] = menu_parent_page
     context['fiber_menu_args'] = {'menu_name': menu_name, 'min_level': min_level, 'max_level': max_level, 'expand': expand}
+    context['templates'] = templates
+    context['class_ul'] = class_ul
     return context
 
 register.inclusion_tag('fiber/menu.html', takes_context=True)(show_menu)
+#register.inclusion_tag('fiber/menu.html', takes_context=True)(show_nav_menu)
 
 
-def show_content(context, content_item_name):
+def show_content(context, content_item_name, item_class="content", allow_tags=False):
     content_item = None
     try:
         content_item = ContentItem.objects.get(name__exact=content_item_name)
+        if not isinstance(allow_tags, bool):
+            try:
+                tpl = template.Template(content_item.content_html)
+                content_item.content_html = tpl.render(context)
+            except:
+                # There are some things we might want to catch
+                # like URL reversing failures
+                pass
     except ContentItem.DoesNotExist:
         pass
+        if AUTO_CREATE_CONTENT_ITEMS:
+            content_item = ContentItem.objects.create(name=content_item_name)
+            return show_content(context, content_item_name, allow_tags)
 
     context['content_item'] = content_item
+    context['item_class'] = item_class
 
     return context
 

@@ -1,2 +1,51 @@
-coverage==3.6
-django-jenkins==0.14.0
+Django==1.5.1
+
+django-mptt==0.5.5
+django-compressor==1.3
+djangorestframework
+
+Markdown
+FeedParser
+html5lib
+slimit
+
+pytils
+pytz
+
+# Admin
+django_extensions
+
+# Migrations
+South
+
+# API
+requests
+
+# Testing
+coverage
+pep8
+pylint
+django-debug-toolbar
+django-jenkins
+
+# Fixtures
+django-whatever
+factory_boy
+
+Werkzeug
+ipython
+
+sorl-thumbnail
+django-guardian
+
+## Translation
+django-modeltranslation
+-e git+git://github.com/cypreess/django-fiber-modeltranslation.git#egg=fiber_modeltranslation
+
+## Caching
+#redis
+#django-cacheops
+#django-redis-sessions
+#hiredis
+#-e git://github.com/sebleier/django-redis-cache.git#egg=redis_cache
+

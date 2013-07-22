@@ -1,1 +1,12 @@
 *.pyc
+.idea/
+node_modules
+temp
+dist
+.sass-cache
+app/bower_components
+.tmp/
+.DS_Store
+atlassian-ide-plugin.xml
+*.log
+testproject/public/static/

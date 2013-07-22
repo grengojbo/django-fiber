@@ -647,7 +647,7 @@ var BaseFileSelectDialog = AdminRESTDialog.extend({
 				'id': 'upload-buttonpane'
 			});
 
-		var upload_button = $('<a>' + gettext('Upload a new file') + '</a>')
+		var upload_button = $('<button type="button">' + gettext('Upload a new file') + '</button>')
 			.appendTo(upload_button_pane)
 			.attr({
 				'class': 'upload',
@@ -665,23 +665,47 @@ var BaseFileSelectDialog = AdminRESTDialog.extend({
 			});
 
 		// Valums file uploader
+        function getCSRFtoken() {
+            var name = 'csrftoken';
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = $.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+		// Valums file uploader 
 		var uploader = new qq.FineUploaderBasic({
+			multipart: true,
+			//fieldName: ,
+			//element: upload_button_pane[0],
 			button: upload_button_pane[0], // connecting directly to the jQUery UI upload_button doesn't work
-			callbacks: {
-				onComplete: $.proxy(function(id, fileName, responseJSON) {
-					this.refresh_grid();
-				}, this)
-			},
-			debug: false,
-			request: {
-				endpoint: this.get_upload_path(),
-				inputName: this.get_upload_fieldname(),
-				params: {
-					'title': this.get_upload_fieldname(),
-					"csrfmiddlewaretoken": getCookie('csrftoken')
-				},
-				paramsInBody: true
-			}
+			//action: ,
+            callbacks: {
+                onSubmit: $.proxy(function(id, fileName) {
+                    uploader._options.request.params.title = fileName;
+                }, this),
+                onComplete: $.proxy(function(id, fileName, responseJSON) {
+                    this.refresh_grid();
+                }, this)
+            },
+            request: {
+                paramsInBody: true,
+                inputName: this.get_upload_fieldname(),
+                endpoint: this.get_upload_path(),
+                customHeaders: {
+                    'X-CSRFToken': getCSRFtoken()
+                }
+            },
+			debug: false
 		});
 
 		// reset button behavior
