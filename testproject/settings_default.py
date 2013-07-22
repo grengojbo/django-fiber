@@ -324,6 +324,10 @@ LOGGING = {
         },
     },
     'loggers': {
+        'fiber': {
+            'handlers': ['default', 'console'],
+            'level': 'DEBUG',
+        },
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
