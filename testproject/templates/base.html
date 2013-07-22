@@ -2,7 +2,8 @@
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js"> <!--<![endif]-->
 {% load i18n static compress fiber_tags cache %}{% load url from future %}
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
@@ -14,103 +15,108 @@
     {% block meta %}{% endblock meta %}
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
     {% compress css %}
-      <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}" type="text/css" charset="utf-8">
-      <link rel="stylesheet" href="{% static 'css/aplication.css' %}" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="{% static 'css/aplication.css' %}" type="text/css" charset="utf-8">
     {% endcompress css %}
     {% block css %}{% endblock css %}
-    
+
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
     <script src="{% static 'js/html5shiv.js' %}"></script>
     <script src="{% static 'js/respond.min.js' %}"></script>
     <![endif]-->
-    
+
     <script src="{% static 'js/vendor/modernizr-2.6.2.min.js' %}"></script>
-    
+
     <!-- Favicons -->
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{% static 'ico/apple-touch-icon-144-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="{% static 'ico/apple-touch-icon-114-precomposed.png">
-       <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{% static 'ico/apple-touch-icon-72-precomposed.png">
-                     <link rel="apple-touch-icon-precomposed" href="{% static 'ico/apple-touch-icon-57-precomposed.png">
-    <link rel="shortcut icon" href="{% static 'ico/favicon.png">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{% static 'ico/apple-touch-icon-144-precomposed.png' %}">
+    <link rel=" apple-touch-icon-precomposed
+    " sizes="114x114" href="{% static 'ico/apple-touch-icon-114-precomposed.png' %}">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{% static 'ico/apple-touch-icon-72-precomposed.png' %}">
+                     <link rel=" apple-touch-icon-precomposed
+    " href="{% static 'ico/apple-touch-icon-57-precomposed.png' %}">
+    <link rel="shortcut icon" href="{% static 'ico/favicon.png' %}">
     
     {% block extrahead %}{% endblock extrahead %}
 </head>
-<body class="jbo-home {% block body_class %}{{ fiber_page.title|slugify }}{% endblock %}">
-<!--[if lt IE 7]>
+<body class=" jbo-home
+    {% block body_class %}{{ fiber_page.title|slugify }}{% endblock %}">
+    <!--[if lt IE 7]>
 <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
 <![endif]-->
-<nav class="navbar navbar-inverse navbar-fixed-top jbo-nav">
-  <div class="container">
-    <a href="/" class="navbar-brand">Django Fiber</a>
-    <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-    </button>
-    <div class="nav-collapse collapse bs-navbar-collapse">
-    {% show_menu "mainmenu" 1 2 class_ul="nav navbar-nav" %}
-    </div>
-    
-    <form action="/i18n/setlang/" method="post" class='navbar-form pull-right' id="locale_switcher">
-          {% csrf_token %}
-          <input name="next" type="hidden" value="{{ request.path }}" />
-          <select name="language" onchange="$('#locale_switcher').submit()">
-            {% for lang in LANGUAGES %}
-            <option value="{{ lang.0 }}" {% if request.LANGUAGE_CODE == lang.0 %}selected{% endif %}>{{ lang.1 }}</option>
-            {% endfor %}
-          </select>
-          <noscript>
-            <input type="submit" value="{% trans "Change language" %}" />
-          </noscript>
-        </form>
-        <p class="navbar-text pull-right">{% trans 'Choose language' %} </p>
-  </div>
-</nav>
+    <nav class="navbar navbar-inverse navbar-fixed-top jbo-nav">
+        <div class="container">
+            <a href="/" class="navbar-brand">Django Fiber</a>
+            <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <div class="nav-collapse collapse bs-navbar-collapse">
+                {% show_menu "mainmenu" 1 2 class_ul="nav navbar-nav" %}
+            </div>
 
-			{% block header %}
-			<header  class="container">
-      					{% block content_title %}
-          <ul class='breadcrumb'>
-            {% for fiber_page in fiber_current_pages %}
-            <li>
-              <a href="{{ fiber_page.get_absolute_url }}">{{ fiber_page.title }}</a>
-            </li>
-            {% endfor %}
-          </ul>
-       {% endblock content_title %}
+            <form action="/i18n/setlang/" method="post" class='navbar-form pull-right' id="locale_switcher">
+                {% csrf_token %}
+                <input name="next" type="hidden" value="{{ request.path }}"/>
+                <select name="language" onchange="$('#locale_switcher').submit()">
+                    {% for lang in LANGUAGES %}
+                        <option value="{{ lang.0 }}"
+                                {% if request.LANGUAGE_CODE == lang.0 %}selected{% endif %}>{{ lang.1 }}</option>
+                    {% endfor %}
+                </select>
+                <noscript>
+                    <input type="submit" value="{% trans "Change language" %}"/>
+                </noscript>
+            </form>
+            <p class="navbar-text pull-right">{% trans 'Choose language' %} </p>
+        </div>
+    </nav>
 
-			</header>
-			{% endblock header %}
-			{% block layout %}
-      <div class="row">
-			<section id="main" class='col-8'>
-				
-				{% block content %}
-				<article>
-					{% show_page_content "main" %}
-				</article>
-				{% endblock content %}
-			</section>
-			{% block slider %}
-			<aside id="aside-right" class='col-4'>
-      <nav id="submenu">
-          {% show_menu "mainmenu" 2 3 %}
-        </nav>
-				{% show_page_content "aside" %}
-                {% cache 600 "fiber:sidebar:address" request.user.username %}
-				{% show_content "address" %}
-                {% endcache %}
-			</aside>
-			{% endblock slider %}
-      </div>
-			{% endblock layout %}
-			{% block footer %}
-			{% endblock footer %}
-	{% compress js %}
+    {% block header %}
+        <header>
+            {% block content_title %}
+                <ul class='breadcrumb'>
+                    {% for fiber_page in fiber_current_pages %}
+                        <li>
+                            <a href="{{ fiber_page.get_absolute_url }}">{{ fiber_page.title }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endblock content_title %}
+
+        </header>
+    {% endblock header %}
+    {% block layout %}
+        <div class="container">
+        <div class="row">
+            <section id="main" class='col-8'>
+                {% block content %}
+                    <article>
+                        {% show_page_content "main" %}
+                    </article>
+                {% endblock content %}
+            </section>
+            {% block slider %}
+                <aside id="aside-right" class='col-4'>
+                    <nav id="submenu">
+                        {% show_menu "mainmenu" 2 3 %}
+                    </nav>
+                    {% show_page_content "aside" %}
+                    {% cache 600 "fiber:sidebar:address" request.user.username %}
+                        {% show_content "address" %}
+                    {% endcache %}
+                </aside>
+            {% endblock slider %}
+        </div>
+        </div>
+    {% endblock layout %}
+{% block footer %}
+{% endblock footer %}
+{% compress js %}
     <script src="{% static 'js/vendor/jquery-1.9.0.min.js' %}"></script>
     <script src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
-    
+
     <!-- Optionally enable responsive features in IE8 -->
     <script src="{% static 'js/vendor/respond.min.js' %}"></script>
     <script src="{% static 'js/vendor/holder.js' %}"></script>
@@ -118,7 +124,7 @@
     <script src="{% static 'js/vendor/i18next-1.6.0.min.js' %}" type="text/javascript" charset="utf-8"></script>
     <script src="{% static 'js/plugins.js' %}" type="text/javascript" charset="utf-8"></script>
     <script src="{% static 'js/main.js' %}" type="text/javascript" charset="utf-8"></script>
-    {% endcompress %}
-    {% block extrajs %}{% endblock extrajs %}
+{% endcompress %}
+{% block extrajs %}{% endblock extrajs %}
 </body>
 </html>
