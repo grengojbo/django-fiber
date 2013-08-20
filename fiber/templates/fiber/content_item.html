@@ -1,4 +1,4 @@
-{% load fiber_tags %}
+{% load fiber_tags i18n admin_urls %}{% load url from future %}
 {% if content_item %}
     {% if content_item|can_edit:user %}
         {% if fiber_page %}
@@ -49,6 +49,9 @@
         {% include content_item.template_name %}
     {% else %}
         {{ content_item.content_html|safe }}
+        {% if content_item|can_edit:user %}
+            <p><a href="{% url 'admin:fiber_contentitem_change' content_item.id %}">{% trans 'Edit' %}</a></p>
+            {% endif %}
     {% endif %}
 
 </div>
