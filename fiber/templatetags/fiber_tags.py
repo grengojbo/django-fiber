@@ -4,11 +4,12 @@ import operator, json
 from django import template
 
 from fiber import __version__ as fiber_version_number
-from fiber.models import Page, ContentItem
+from fiber.models import Page, ContentItem, PageContentItem
 from fiber.utils.urls import get_admin_change_url
 from fiber.app_settings import PERMISSION_CLASS, AUTO_CREATE_CONTENT_ITEMS
 from fiber.utils import class_loader
-
+import logging
+logger = logging.getLogger(__name__)
 
 PERMISSIONS = class_loader.load_class(PERMISSION_CLASS)
 
@@ -171,35 +172,42 @@ def do_show_page_content(parser, token):
 
 
 class ShowPageContentNode(template.Node):
-
     def __init__(self, page, block_name):
         self.page = template.Variable(page)
         self.block_name = block_name
+        logger.debug('Page: {0} block_name: {1}'.format(self.page, self.block_name))
 
     def render(self, context):
         try:
             page = self.page.resolve(context)
+            logger.debug('Page resolve: {0} block_name: {1}'.format(page, self.block_name))
             page_content_items = page.page_content_items.filter(block_name=self.block_name).order_by('sort').select_related('content_item')
-
-            content_items = []
-            for page_content_item in page_content_items:
-                content_item = page_content_item.content_item
-                content_item.page_content_item = page_content_item
-                content_items.append(content_item)
-
-            context.push()
-            context['fiber_page'] = page
-            context['ContentItem'] = ContentItem
-            context['fiber_block_name'] = self.block_name
-            context['fiber_content_items'] = content_items
-            t = template.loader.get_template('fiber/content_items.html')
-            content = t.render(context)
-            context.pop()
-            return content
-
+            logger.debug('page_content_items: {0}'.format(page_content_items))
         except template.VariableDoesNotExist:
+            try:
+                page = self.page
+                page_content_items = PageContentItem.objects.filter(page__title=self.page, block_name=self.block_name).order_by('sort').select_related('content_item')
+                logger.debug('Page: {1} page_content_items: {0}'.format(page_content_items, page))
+            except Page.DoesNotExist:
+                logger.warn('[page does not exist in the context] Page: {0}'.format(self.page))
             # page does not exist in the context
             return ''
+        content_items = []
+        for page_content_item in page_content_items:
+            content_item = page_content_item.content_item
+            content_item.page_content_item = page_content_item
+            content_items.append(content_item)
+
+        context.push()
+        context['fiber_page'] = page
+        context['ContentItem'] = ContentItem
+        context['fiber_block_name'] = self.block_name
+        context['fiber_content_items'] = content_items
+        logger.debug('context: {0}'.format(context))
+        t = template.loader.get_template('fiber/content_items.html')
+        content = t.render(context)
+        context.pop()
+        return content
 
 
 @register.tag(name='captureas')

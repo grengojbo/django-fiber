@@ -1,9 +1,9 @@
+# -*- mode: python; coding: utf-8; -*-
 import re
-
 from django.core.exceptions import ImproperlyConfigured
-
 from .models import Page
-
+import logging
+logger = logging.getLogger(__name__)
 
 class FiberPageMixin(object):
     """
@@ -28,6 +28,7 @@ class FiberPageMixin(object):
                 u"{cls}.fiber_page_url, or override "
                 u"{cls}.get_fiber_page_url().".format(cls=self.__class__.__name__)
             )
+        logger.debug('fiber_page_url: {0}'.format(self.fiber_page_url))
         return self.fiber_page_url
 
     def get_fiber_page(self):

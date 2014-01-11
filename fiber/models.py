@@ -51,11 +51,11 @@ class ContentItem(models.Model):
 
     @classmethod
     def get_add_url(cls):
-        named_url = 'fiber_admin:%s_%s_add' % (cls._meta.app_label, cls._meta.object_name.lower())
+        named_url = 'fiber_admin:{0}_{1}_add'.format(cls._meta.app_label, cls._meta.object_name.lower())
         return reverse(named_url)
 
     def get_change_url(self):
-        named_url = 'fiber_admin:%s_%s_change' % (self._meta.app_label, self._meta.object_name.lower())
+        named_url = 'fiber_admin:{0}_{1}_change'.format(self._meta.app_label, self._meta.object_name.lower())
         return reverse(named_url, args=(self.id, ))
 
     def set_used_on_pages_json(self):
