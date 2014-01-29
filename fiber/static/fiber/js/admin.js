@@ -352,10 +352,10 @@ var AdminForm = Class.extend({
 		var forms = $(document.createElement('div')).html(this.strip_HTML(html)).find('form[id$=_form]');
 		if (forms.length == 1) {
 			this.form = $(forms[0]);
-
-      this.form.find('footer.grp-submit-row').remove(); // remove grappelli footer
-			this.form.append('<input type="hidden" name="_continue" />'); // this prevents the redirect to the changelist
+            this.form.find('footer.grp-submit-row').remove(); // remove grappelli footer
+		    this.form.append('<input type="hidden" name="_continue" />'); // this prevents the redirect to the changelist
 		}
+        console.log('get_form_from_HTML line 358');
 	},
 
 	// helper function for cleaning HTML
@@ -579,11 +579,14 @@ var ChangeForm = AdminForm.extend({
 	set_styling: function() {
 		// remove submit button(s) and `delete` link
 		this.form.find('div.submit-row').remove();
-
+        console.log('div.inner-right-column line 582');
+        this.form.find('div.inner-right-column').remove();
+        //$('.inner-right-column').remove();
 		// strip ':' from the end of labels
 		this.form.find('label').each(function() {
 			$(this).text($(this).text().replace(':', ''));
 		});
+        console.log('set_styling line 587');
 	},
 
 	set_interaction: function() {

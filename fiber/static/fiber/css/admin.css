@@ -1,11 +1,11 @@
 .navbar-fixed-top, .navbar-fixed-bottom {
     z-index: 800;
 }
-* {
-  -webkit-box-sizing: content-box;
-    -moz-box-sizing: content-box;
-    box-sizing: content-box;
-}
+/** {*/
+  /*-webkit-box-sizing: content-box;*/
+  /*-moz-box-sizing: content-box;*/
+  /*box-sizing: content-box;*/
+/*}*/
 
 body div#wpr-body {
 	margin-left: 10px;
@@ -522,7 +522,10 @@ span.nobr {
 .df-admin #page_form {
 	overflow: hidden;
 	padding: 0 15px;
-	width: 295px;
+	/*width: 295px;*/
+    -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
 }
 
 .df-admin #page_form fieldset {
@@ -806,4 +809,8 @@ ul.jqtree-tree .jqtree-moving > div .jqtree-title {
 
 .simple-data-grid thead th a .sort {
 	top: 4px;
+}
+/* jbo add */
+select, input[type="file"] {
+    height: 18px;
 }
