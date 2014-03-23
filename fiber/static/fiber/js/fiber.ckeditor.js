@@ -27,7 +27,7 @@ Fiber.enhance_textarea = function(textarea, auto_height) {
 	CKEDITOR.replace(textarea, {
 		skin: 'kama',
 		language: LANGUAGE_CODE,
-		extraPlugins: 'fpagelink,ffilelink,fimagelink,fcustomlink,funlink,fimage,ftable,tabletools',
+		extraPlugins: 'fpagelink,ffilelink,fimagelink,fcustomlink,funlink,fimage,ftable,tabletools,flash,iframe',
 		removePlugins: 'scayt,menubutton,forms,image,link',
 		toolbar: window.CKEDITOR_CONFIG_TOOLBAR,
 		format_tags: window.CKEDITOR_CONFIG_FORMAT_TAGS || 'p;h2;h3;h4',
